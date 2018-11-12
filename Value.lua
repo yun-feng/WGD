@@ -33,3 +33,5 @@ ValueNet:add(nn.Reshape(nkernels[3]*nchannel))
 ValueNet:add(nn.Linear(nkernels[3]*nchannel, nkernels[4]))
 ValueNet:add(nn.SoftMax())
 ValueNet:add(nn.Linear(nkernels[4] , 1))
+
+ValueNet_eval=ValueNet:clone()
