@@ -14,22 +14,22 @@ nkernels = {320,480,960,100}
 ValueNet = nn.Sequential()
 
 
-ValueNet:add(nn.SpatialConvolutionMM(nfeats, nkernels[1], 1, 8, 1, 1, 0,3))
+ValueNet:add(nn.SpatialConvolution(nfeats, nkernels[1], 1, 7, 1, 1, 0,3))
 ValueNet:add(nn.Threshold(0, 1e-6))
-ValueNet:add(nn.SpatialMaxPooling(1,4,1,4,0,4-width%4))
+ValueNet:add(nn.SpatialMaxPooling(1,4,1,4,0,2))
 ValueNet:add(nn.Dropout(0.2))
 
 ValueNet:add(nn.SpatialConvolutionMM(nkernels[1], nkernels[2], 1, 8, 1, 1, 0,3))
 ValueNet:add(nn.Threshold(0, 1e-6))
-ValueNet:add(nn.SpatialMaxPooling(1,4,1,4,0,4-math.ceil(width/4)%4))
+ValueNet:add(nn.SpatialMaxPooling(1,4,1,4,0,2))
 ValueNet:add(nn.Dropout(0.2))
 
-ValueNet:add(nn.SpatialConvolutionMM(nkernels[2], nkernels[3], 1, 8, 1, 1, 0,3))
+ValueNet:add(nn.SpatialConvolutionMM(nkernels[2], nkernels[3], 1, 7, 1, 1, 0,3))
 ValueNet:add(nn.Threshold(0, 1e-6))
 ValueNet:add(nn.Dropout(0.5))
 
-nchannel = math.ceil((math.ceil((width)/4.0))/4.0)
+nchannel = math.floor((math.floor((width)/4.0))/4.0)
 ValueNet:add(nn.Reshape(nkernels[3]*nchannel))
 ValueNet:add(nn.Linear(nkernels[3]*nchannel, nkernels[4]))
-ValueNet:add(nn.Threshold(0, 1e-6))
+ValueNet:add(nn.SoftMax())
 ValueNet:add(nn.Linear(nkernels[4] , 1))
