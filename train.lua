@@ -188,12 +188,11 @@ end
 
 function model_train()
     
-	local temp,losses=opt.Method(feval,par,opt.StateVal);
+	local temp,losses=opt.Method(feval_Val,par_Val,opt.State_Val);
+	local temp,losses=opt.Method(feval_Val_eval,par_Val_eval,opt.State_Val_eval);
+	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
+	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
+	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 	
-	opt.Method(Chrom_eval,Chrom_par,opt.StateChrom);
-	
-	opt.Method(Policy_eval,Policy_par,opt.StatePolicy);
-    
-    return losses;
 end
     
