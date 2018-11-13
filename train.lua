@@ -7,7 +7,22 @@ require "optim"
 
 opt.KernelMax=0.9
 
-opt.StateVal = {
+function deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
+opt.State_Val = {
    learningRate=0.001,
    learningRateDecay=1e-5,
    weightDecay=1e-6,
@@ -15,40 +30,24 @@ opt.StateVal = {
    beta2=0.99,
    epsilon=1e-8
 }
-opt.StateChrom = {
-   learningRate=0.001,
-   learningRateDecay=1e-5,
-   weightDecay=1e-6,
-   beta1=0.9,
-   beta2=0.99,
-   epsilon=1e-8
-}
-opt.StatePolicy = {
-   learningRate=0.001,
-   learningRateDecay=1e-5,
-   weightDecay=1e-6,
-   beta1=0.9,
-   beta2=0.99,
-   epsilon=1e-8
-}
+
+opt.State_Val_eval=deepcopy(opt.State_Val)
+
+opt.State_Chrom=deepcopy(opt.State_Val)
+opt.State_CNV=deepcopy(opt.State_Val)
+opt.State_End=deepcopy(opt.State_Val)
+
 opt.Method = optim.adam;
 
 
 
 
+par_Val,parGrad_Val=ValueNet:getParameters();
 
-ValueNet:training();
 
-par,parGrad=ValueNet:getParameters();
-
-old_par=par:clone()
-new_par=par:clone()
-
-criterion=nn.MSECriterion()
-
-feval=function(x)
-    if x~=par then
-        par:copy(x)
+feval_Val=function(x)
+    if x~=par_Val then
+        par_Val:copy(x)
     end
     
     
@@ -56,86 +55,135 @@ feval=function(x)
     
 	--normalization for kernal 
     for i = 1,#ValueNet.modules do
-        if string.find(tostring(ValueNet.modules[i]), 'SpatialConvolutionMM') then
+        if string.find(tostring(ValueNet.modules[i]), 'SpatialConvolution') then
                 ValueNet.modules[i].weight:renorm(2,1,opt.KernelMax)
         end
     end
     
-	old_par=(1-0.001)*old_par+0.001*new_par
-	par=old_par
-	targets=train.reward+ValueNet:forward(train.next)
-	par=new_par
 	
-    local f=criterion:forward(ValueNet:forward(train.state),targets);
-    
-    model:backward(train.state,criterion:backward(ValueNet.output,targets));
-    
-    return f,parGrad;
+	ValueNet:forward(train.state)
+	local f=0.5*train.Advantage:pow(2);
+	ValueNet:backward(train.state,-train.Advantage);
+    return f,parGrad_Val;
 end
 
-ChromNet:training();
-UpperPolicyNet:training();
-
-Chrom_par,Chrome_parGrad=ChromNet:getParameters();
-Policy_par,Policy_parGrad=UpperPolicyNet:getParameters();
-
-Chrom_eval=function(x)
-    if x~=Chrom_par then
-        Chrom_par:copy(x)
+par_Val_eval,parGrad_Val_eval=ValueNet_eval:getParameters();
+feval_Val_eval=function(x)
+    if x~=par_Val then
+        par_Val_eval:copy(x)
     end
     
     
-    ChromNet:zeroGradParameters();
+    ValueNet_eval:zeroGradParameters();
     
 	--normalization for kernal 
-    for i = 1,#ChromNet.modules do
-        if string.find(tostring(ChromNet.modules[i]), 'SpatialConvolutionMM') then
-                ChromNet.modules[i].weight:renorm(2,1,opt.KernelMax)
+    for i = 1,#ValueNet_eval.modules do
+        if string.find(tostring(ValueNet.modules[i]), 'SpatialConvolution') then
+                ValueNet.modules[i].weight:renorm(2,1,opt.KernelMax)
         end
     end
     
-	par=old_par
-	targets=train.reward+ValueNet:forward(train.next)-ValueNet:forward(train.state)
-	par=new_par
 	
-    local f=targets;
+	ValueNet:forward(train.state)
+	local f=0.5*torch.norm(par_Val-par_Val_eval)^2;
+	parGrad_Val_eval=par_Val-par_Val_eval;
     
-	local grad=torch.Tensor(22+2)
-	grad:zero()
-	grad:indexFill(2,torch.LongTensor{train.ChromAct},1)
-    ChromNet:backward(train.state,grad);
-    
-    return f,Chrom_parGrad;
+    return f,parGrad_Val_eval;
 end
 
-Policy_eval=function(x)
-    if x~=Policy_par then
-        Policy_par:copy(x)
+
+par_Chrom,parGrad_Chrom=Chrom_Model:getParameters();
+
+feval_Chrom=function(x)
+    if x~=par_Chrom then
+        par_Chrom:copy(x)
     end
     
     
-    PolicyNet:zeroGradParameters();
+    Chrom_Model:zeroGradParameters();
     
 	--normalization for kernal 
-    for i = 1,#UpperPolicyNet.modules do
-        if string.find(tostring(UpperPolicy.modules[i]), 'SpatialConvolutionMM') then
-                UpperPolicyNet.modules[i].weight:renorm(2,1,opt.KernelMax)
+    for i = 1,#Chrom_Model.modules do
+        if string.find(tostring(Chrom_Model.modules[i]), 'SpatialConvolution') then
+                Chrom_Model.modules[i].weight:renorm(2,1,opt.KernelMax)
         end
     end
-    
-	par=old_par
-	targets=train.reward+ValueNet:forward(train.next)-ValueNet:forward(train.state)
-	par=new_par
 	
-    local f=targets;
+    local f=train.Advantage;
     
-	local grad=torch.Tensor(5*50+2)
-	grad:zero()
-	grad:indexFill(2,torch.LongTensor{train.FocusAct},1)
-	grad=grad[1][3:252]
-    UpperPolicyNet:backward({train.state,train.focus},grad);
+	local grad=torch.zeros(Chrom_Model.output:size())
+	for i= 1,grad:size(1) do
+		grad[i][train.ChrA[i]]=train.Advantage[i]
+	end
+	grad=torch.cdiv(grad,Chrom_Model.output);
+	
+    Chrom_Model:backward(train.state,grad);
     
-    return f,Policy_parGrad;
+    return f,parGrad_Chrom;
+end
+
+par_CNV,parGrad_CNV=CNV_Model:getParameters()
+
+feval_CNV=function(x)
+    if x~=par_CNV then
+        par_CNV:copy(x)
+    end
+    
+    
+    CNV_Model:zeroGradParameters();
+    
+	--normalization for kernal 
+    for i = 1,#CNV_Model.modules do
+        if string.find(tostring(CNV_Model.modules[i]), 'SpatialConvolution') then
+                CNV_Model.modules[i].weight:renorm(2,1,opt.KernelMax)
+        end
+    end
+	
+    local f=train.Advantage;
+    
+	local grad=torch.zeros(CNV_Model.output:size())
+	for i= 1,grad:size(1) do
+		if train.ChrA[i]>2 then
+			grad[i][train.CNV[i]]=train.Advantage[i]
+		end
+	end
+	grad=torch.cdiv(grad,Chrom_Model.output);
+	
+    CNV_Model:backward({train.state,train.chrom_state},grad);
+    
+    return f,parGrad_CNV;
+end
+
+par_End,parGrad_End=End_Point_Model:getParameters()
+
+feval_End=function(x)
+    if x~=par_End then
+        par_End:copy(x)
+    end
+    
+    
+    End_Point_Model:zeroGradParameters();
+    
+	--normalization for kernal 
+    for i = 1,#End_Point_Model.modules do
+        if string.find(tostring(End_Point_Model.modules[i]), 'SpatialConvolution') then
+                End_Point_Model.modules[i].weight:renorm(2,1,opt.KernelMax)
+        end
+    end
+	
+    local f=train.Advantage;
+    
+	local grad=torch.zeros(End_Point_Model.output:size())
+	for i= 1,grad:size(1) do
+		if train.ChrA[i]>2 then
+			grad[i][train.End[i]]=train.Advantage[i]
+		end
+	end
+	grad=torch.cdiv(grad,End_Point_Model.output);
+	
+    End_Point_Model:backward({train.chrom_state,train.chrom_state_new},grad);
+    
+    return f,parGrad_End;
 end
 
 function model_train()
