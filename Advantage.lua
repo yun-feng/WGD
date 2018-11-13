@@ -8,9 +8,8 @@ WGD=0.6;
 const1=1;
 const2=0.1;
 
-Advantage=function(ChrA,FocA,StartL,EndL,StartS,EndS)
-	local reward,old;
-	old=ValueNet_eval:forward(StartS);
+Reward=function(ChrA,StartL,EndL,StartS,EndS)
+	local reward;
 	if ChrA==1 then
 		reward=torch.sum(torch.abs(StartS-1))*log(single_loci_loss);
 	else 
@@ -30,5 +29,12 @@ Advantage=function(ChrA,FocA,StartL,EndL,StartS,EndS)
 		end
 	end
 
-	return reward-old;
+	return reward;
+end
+
+Advantage=function()
+	ValueNet_eval:forward(train.state);
+	train.Advantage=train.Reward-train.state;
+	
+	return train.Advantage;
 end
