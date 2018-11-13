@@ -15,70 +15,71 @@ nkernels = {160,240,480,22+2}
 
 
 --determin which chromosome to change
-ChromNet = nn.Sequential()
+Chrom_Net = nn.Sequential()
 
 
-ChromNet:add(nn.SpatialConvolution(nfeats, nkernels[1], 1, 7, 1, 1, 0,3))
-ChromNet:add(nn.Threshold(0, 1e-6))
-ChromNet:add(nn.SpatialMaxPooling(1,4,1,4,0,2))
---ChromNet:add(nn.Dropout(0.2))
+Chrom_Net:add(nn.SpatialConvolution(nfeats, nkernels[1], 1, 7, 1, 1, 0,3))
+Chrom_Net:add(nn.Threshold(0, 1e-6))
+Chrom_Net:add(nn.SpatialMaxPooling(1,4,1,4,0,2))
+--Chrom_Net:add(nn.Dropout(0.2))
 
-ChromNet:add(nn.SpatialConvolution(nkernels[1], nkernels[2], 1, 8, 1, 1, 0,3))
-ChromNet:add(nn.Threshold(0, 1e-6))
-ChromNet:add(nn.SpatialMaxPooling(1,4,1,4,0,2))
---ChromNet:add(nn.Dropout(0.2))
+Chrom_Net:add(nn.SpatialConvolution(nkernels[1], nkernels[2], 1, 8, 1, 1, 0,3))
+Chrom_Net:add(nn.Threshold(0, 1e-6))
+Chrom_Net:add(nn.SpatialMaxPooling(1,4,1,4,0,2))
+--Chrom_Net:add(nn.Dropout(0.2))
 
-ChromNet:add(nn.SpatialConvolution(nkernels[2], nkernels[3], 1, 8, 1, 1, 0,3))
-ChromNet:add(nn.Threshold(0, 1e-6))
----ChromNet:add(nn.Dropout(0.5))
+Chrom_Net:add(nn.SpatialConvolution(nkernels[2], nkernels[3], 1, 8, 1, 1, 0,3))
+Chrom_Net:add(nn.Threshold(0, 1e-6))
+---Chrom_Net:add(nn.Dropout(0.5))
 
 nchannel = math.floor((math.floor((width)/4.0))/4.0)
-ChromNet:add(nn.Reshape(nkernels[3]*nchannel))
-ChromNet:add(nn.Linear(nkernels[3]*nchannel, nkernels[4]))
-ChromNet:add(nn.Threshold(0, 1e-6))
-ChromNet:add(nn.Linear(nkernels[4] ,nkernels[4]))
-ChromNet:add(nn.SoftMax())
+Chrom_Net:add(nn.Reshape(nkernels[3]*nchannel))
+Chrom_Net:add(nn.Linear(nkernels[3]*nchannel, nkernels[4]))
+Chrom_Net:add(nn.Threshold(0, 1e-6))
+Chrom_Net:add(nn.Linear(nkernels[4] ,nkernels[4]))
+Chrom_Net:add(nn.SoftMax())
 
+Chrom_Model=Chrom_Net;
 
 --determine the starting position and type of CNV
-Double_i1 =-nn.SpatialConvolution(nfeats,nkernels[1]/4, 1, 7, 1, 1, 0,3)
-Double_h1 =Double_i1-nn.Threshold(0, 1e-6)
-Double_h1 =Double_h1-nn.SpatialMaxPooling(1,20,1,20,0,2)
+CNV_i1 =-nn.SpatialConvolution(nfeats,nkernels[1]/4, 1, 7, 1, 1, 0,3)
+CNV_h1 =CNV_i1-nn.Threshold(0, 1e-6)
+CNV_h1 =CNV_h1-nn.SpatialMaxPooling(1,20,1,20,0,2)
 
-Double_i2 =-nn.SpatialConvolution(nfeats,nkernels[1]/4, 1, 7, 1, 1, 0,3)
-Double_h2 =Double_i2-nn.Threshold(0, 1e-6)
+CNV_i2 =-nn.SpatialConvolution(nfeats,nkernels[1]/4, 1, 7, 1, 1, 0,3)
+CNV_h2 =CNV_i2-nn.Threshold(0, 1e-6)
 
-DoubleValue={Double_h1,Double_h2}-nn.JoinTable(2,3)
+CNV_Net={CNV_h1,CNV_h2}-nn.JoinTable(2,3)
 
-DoubleValue =DoubleValue-nn.SpatialConvolution(nkernels[1]/4, nkernels[2]/4, 1, 8, 1, 1, 0,3)
-DoubleValue =DoubleValue-nn.Threshold(0, 1e-6)
-DoubleValue =DoubleValue-nn.SpatialMaxPooling(1,4,1,4,0,2)
+CNV_Net =CNV_Net-nn.SpatialConvolution(nkernels[1]/4, nkernels[2]/4, 1, 8, 1, 1, 0,3)
+CNV_Net =CNV_Net-nn.Threshold(0, 1e-6)
+CNV_Net =CNV_Net-nn.SpatialMaxPooling(1,4,1,4,0,2)
 
 
-DoubleValue =DoubleValue-nn.SpatialConvolution(nkernels[2]/4, nkernels[3]/4, 1, 8, 1, 1, 0,3)
-DoubleValue =DoubleValue-nn.Threshold(0, 1e-6)
+CNV_Net =CNV_Net-nn.SpatialConvolution(nkernels[2]/4, nkernels[3]/4, 1, 8, 1, 1, 0,3)
+CNV_Net =CNV_Net-nn.Threshold(0, 1e-6)
 
 nchannel = math.floor((math.floor((width)/20)+chrom_width)/4)
-DoubleValue =DoubleValue-nn.Reshape(nkernels[3]/4*nchannel)
-DoubleValue =DoubleValue-nn.linear(nkernels[3]/4*nchannel,5*chrom_width)
+CNV_Net =CNV_Net-nn.Reshape(nkernels[3]/4*nchannel)
+CNV_Net =CNV_Net-nn.linear(nkernels[3]/4*nchannel,5*chrom_width)
 
+CNV_Model=nn.gModule({CNV_i1,CNV_i2},{CNV_Net});
 
 --determin the end position
-Focus_i1=-nn.Identity()
-Focus_i2=-nn.Identity()
-FocusNet={Focus_i1,Focus_i2}-nn.JoinTable(1,3)
-FocusNet=FocusNet-nn.SpatialConvolution(2*nfeats, nkernels[1]/4, 1, 7, 1, 1, 0,3)
-FocusNet =FocusNet-nn.Threshold(0, 1e-6)
---FocusNet =FocusNet-nn.SpatialMaxPooling(1,4,1,4,0,4-width%4)
+End_Point_i1=-nn.Identity()
+End_Point_i2=-nn.Identity()
+End_Point_Net={End_Point_i1,End_Point_i2}-nn.JoinTable(1,3)
+End_Point_Net=End_Point_Net-nn.SpatialConvolution(2*nfeats, nkernels[1]/4, 1, 7, 1, 1, 0,3)
+End_Point_Net =End_Point_Net-nn.Threshold(0, 1e-6)
+--End_Point_Net =End_Point_Net-nn.SpatialMaxPooling(1,4,1,4,0,4-width%4)
 
 
-FocusNet =FocusNet-nn.SpatialConvolution(nkernels[1], nkernels[2]/4, 1, 7, 1, 1, 0,3)
-FocusNet =FocusNet-nn.Threshold(0, 1e-6)
---DoubleValue =DoubleValue-nn.SpatialMaxPooling(1,5,1,5,0,5-math.ceil(width/20)%5)
+End_Point_Net =End_Point_Net-nn.SpatialConvolution(nkernels[1], nkernels[2]/4, 1, 7, 1, 1, 0,3)
+End_Point_Net =End_Point_Net-nn.Threshold(0, 1e-6)
+--CNV_Net =CNV_Net-nn.SpatialMaxPooling(1,5,1,5,0,5-math.ceil(width/20)%5)
 
 
-FocusNet =FocusNet-nn.Reshape(nkernels[2]/4*ChromNet)
-FocusNet =FocusNet-nn.linear(nkernels[2]/4,chrom_width)
+End_Point_Net =End_Point_Net-nn.Reshape(nkernels[2]/4*Chrom_Net)
+End_Point_Net =End_Point_Net-nn.linear(nkernels[2]/4,chrom_width)
 
---UpperPolicyNet=nn.CAddTable()({FocusNet,DoubleValue})
---UpperPolicyNet=UpperPolicyNet-nn.SoftMax()
+End_Point_Model=nn.gModule({End_Point_i1,End_Point_i2},{End_Point_Net});
