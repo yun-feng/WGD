@@ -26,15 +26,16 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 					reward=log(Whole_Chromosome_CNV);
 				end
 			end
+			reward=reward+ValueNet_eval:forward(EndS);
 		end
 	end
 
 	return reward;
 end
 
-Advantage=function()
+Advantage_cal=function()
 	ValueNet_eval:forward(train.state);
-	train.Advantage=train.Reward-train.state;
+	train.Advantage=train.Reward-ValueNet_eval.output:select(2,1);
 	
 	return train.Advantage;
 end
