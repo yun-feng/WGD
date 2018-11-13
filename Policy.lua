@@ -68,7 +68,7 @@ CNV_Model=nn.gModule({CNV_i1,CNV_i2},{CNV_Net});
 --determin the end position
 End_Point_i1=-nn.Identity()
 End_Point_i2=-nn.Identity()
-End_Point_Net={End_Point_i1,End_Point_i2}-nn.JoinTable(1,3)
+End_Point_Net={End_Point_i1,End_Point_i2}-nn.JoinTable(2,3)
 End_Point_Net=End_Point_Net-nn.SpatialConvolution(2*nfeats, nkernels[1]/4, 1, 7, 1, 1, 0,3)
 End_Point_Net =End_Point_Net-nn.Threshold(0, 1e-6)
 --End_Point_Net =End_Point_Net-nn.SpatialMaxPooling(1,4,1,4,0,4-width%4)
