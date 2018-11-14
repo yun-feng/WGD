@@ -2,32 +2,43 @@ require "torch"
 
 
 opt={};
-
-train.state=readdata()
-
-dofile "/data/ted/cnv/Value.lua";
-dofile "/data/ted/cnv/Policy.lua";
+train={};
+wkdir="/data/ted/WGD/"
 
 
-dofile "/data/ted/cnv/train.lua";
-dofile "/data/ted/cnv/data.lua";
+dofile (wkdir.."Value.lua");
+dofile (wkdir.."Policy.lua");
+dofile (wkdir.."Advantage.lua");
+dofile (wkdir.."train.lua");
+dofile (wkdir.."data.lua");
 
-cycle=12000000;
+cycle=100000000
 
-
-for c = 1,cycle do
+for c=1,cycle do
 	if c%10==0 then
+		flag=1;
         print(string.format("Start cycle %d", c));
         print("Loading data");
-		train.state=readdata();
-		LoadData();
+		LoadData(flag);
         print("Start train");
-		training_loss=torch.Tensor(model_train());
-        print(string.format("loss %6.6f",training_loss));
+		model_train();
+
+		local Reward-to-go=train.Reward:sum()/train.Reward:size(1)
+        print(string.format("Average Reward to go %6.6f",Reward-to-go));
         print("Save model");
-		torch.save("/data/ted/cnv/ValueNet",ValueNet);
-        torch.save("/data/ted/cnv/ChromNet",ChromNet);
-        torch.save("/data/ted/cnv/PolicyNet",UpperPolicyNet);
-		torch.save("/data/ted/cnv/old_par",old_par);
+		torch.save(wkdir.."Model_ValueNet",ValueNet);
+		torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
+        torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);
+        torch.save(wkdir.."Model_CNV_Model",CNV_Model);
+		torch.save(wkdir.."End_Point_Model",End_Point_Model);
+	else
+		flag=0;
+		LoadData(flag);
+		model_train();
+		torch.save(wkdir.."Model_ValueNet",ValueNet);
+		torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
+        torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);
+        torch.save(wkdir.."Model_CNV_Model",CNV_Model);
+		torch.save(wkdir.."End_Point_Model",End_Point_Model);
 	end
 end

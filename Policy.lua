@@ -3,7 +3,7 @@ require 'nn'
 require 'nngraph'
 
 
-
+chrom_width=width/22;
 nkernels = {160,240,480,22+2}
 
 
