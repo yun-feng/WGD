@@ -2,15 +2,8 @@ require 'torch'
 require 'nn'
 require 'nngraph'
 
---seq as nfeats*width*1
 
 
-nfeats = 2
-width = trainData.data:size(3)
-chrom_width=width/22
-
-height = 1
-ninputs = nfeats*width*height
 nkernels = {160,240,480,22+2}
 
 

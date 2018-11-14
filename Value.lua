@@ -3,9 +3,13 @@ require 'nn'
 
 require 'math'
 
+--seq as nfeats*width*1
+
+
+
 
 nfeats = 2
-width = trainData.data:size(3)
+width = 22*50
 height = 1
 ninputs = nfeats*width*height
 nkernels = {320,480,960,100}
