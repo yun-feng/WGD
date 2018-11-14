@@ -2,7 +2,7 @@ require "torch"
 
 require "math"
 
-cnp_file
+cnp_file=(wkdir.."simulation_cnp.txt")
 
 chrom_extract=function(cnp,chrom)
 	if chrom<=2 then
