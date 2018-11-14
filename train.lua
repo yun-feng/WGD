@@ -60,8 +60,6 @@ feval_Val=function(x)
         end
     end
     
-	
-	ValueNet:forward(train.state)
 	local f=0.5*train.Advantage:pow(2);
 	ValueNet:backward(train.state,-train.Advantage);
     return f,parGrad_Val;

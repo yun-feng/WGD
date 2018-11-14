@@ -34,8 +34,8 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 end
 
 Advantage_cal=function()
-	ValueNet_eval:forward(train.state);
-	train.Advantage=train.Reward-ValueNet_eval.output:select(2,1);
+	ValueNet:forward(train.state);
+	train.Advantage=train.Reward-ValueNet.output:select(2,1);
 	
 	return train.Advantage;
 end
