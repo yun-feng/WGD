@@ -1,5 +1,5 @@
 #simulate data for training WGD model
-setwd("Documents/WGD")
+setwd("/data/ted/WGD")
 
 nsample=500;
 
@@ -51,4 +51,4 @@ for(j in 1:nstep2){
 }
 
 write.table(wkdata,"Simulation_cnp.txt",sep="\t",quote=F,row.names=F,col.names=F)
-wkdata<-read.table("simulation_cnp.txt",sep="\t",header=F)
+wkdata<-read.table("Simulation_cnp.txt",sep="\t",header=F)

@@ -61,7 +61,7 @@ feval_Val=function(x)
     end
     
 	local f=0.5*train.Advantage:pow(2);
-	ValueNet:backward(train.state,-train.Advantage);
+	ValueNet:backward(train.state,-torch.Tensor(train.Advantage):resize(train.Advantage:size(1),1));
     return f,parGrad_Val;
 end
 
@@ -145,7 +145,7 @@ feval_CNV=function(x)
 			grad[i][train.CNV[i]]=train.Advantage[i]
 		end
 	end
-	grad=torch.cdiv(grad,Chrom_Model.output);
+	grad=torch.cdiv(grad,CNV_Model.output);
 	
     CNV_Model:backward({train.state,train.chrom_state},grad);
     

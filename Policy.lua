@@ -54,7 +54,7 @@ CNV_Net =CNV_Net-nn.Threshold(0, 1e-6)
 
 nchannel = math.floor((math.floor((width)/20)+chrom_width)/4)
 CNV_Net =CNV_Net-nn.Reshape(nkernels[3]/4*nchannel)
-CNV_Net =CNV_Net-nn.linear(nkernels[3]/4*nchannel,5*chrom_width)
+CNV_Net =CNV_Net-nn.Linear(nkernels[3]/4*nchannel,5*chrom_width)
 CNV_Net =CNV_Net-nn.SoftMax();
 
 CNV_Model=nn.gModule({CNV_i1,CNV_i2},{CNV_Net});
@@ -62,19 +62,19 @@ CNV_Model=nn.gModule({CNV_i1,CNV_i2},{CNV_Net});
 --determin the end position
 End_Point_i1=-nn.Identity()
 End_Point_i2=-nn.Identity()
-End_Point_Net={End_Point_i1,End_Point_i2}-nn.JoinTable(2,3)
+End_Point_Net={End_Point_i1,End_Point_i2}-nn.JoinTable(1,3)
 End_Point_Net=End_Point_Net-nn.SpatialConvolution(2*nfeats, nkernels[1]/4, 1, 7, 1, 1, 0,3)
 End_Point_Net =End_Point_Net-nn.Threshold(0, 1e-6)
 --End_Point_Net =End_Point_Net-nn.SpatialMaxPooling(1,4,1,4,0,4-width%4)
 
 
-End_Point_Net =End_Point_Net-nn.SpatialConvolution(nkernels[1], nkernels[2]/4, 1, 7, 1, 1, 0,3)
+End_Point_Net =End_Point_Net-nn.SpatialConvolution(nkernels[1]/4, nkernels[2]/4, 1, 7, 1, 1, 0,3)
 End_Point_Net =End_Point_Net-nn.Threshold(0, 1e-6)
 --CNV_Net =CNV_Net-nn.SpatialMaxPooling(1,5,1,5,0,5-math.ceil(width/20)%5)
 
 
-End_Point_Net =End_Point_Net-nn.Reshape(nkernels[2]/4*Chrom_Net)
-End_Point_Net =End_Point_Net-nn.linear(nkernels[2]/4,chrom_width)
-End_Point_Model= End_Point_Model-nn.SoftMax()
+End_Point_Net =End_Point_Net-nn.Reshape(nkernels[2]/4*chrom_width)
+End_Point_Net =End_Point_Net-nn.Linear(nkernels[2]/4*chrom_width,chrom_width)
+End_Point_Net= End_Point_Net-nn.SoftMax()
 
 End_Point_Model=nn.gModule({End_Point_i1,End_Point_i2},{End_Point_Net});

@@ -14,7 +14,7 @@ dofile (wkdir.."data.lua");
 
 cycle=100000000
 
-for c=1,cycle do
+for c=0,cycle do
 	if c%10==0 then
 		flag=1;
         print(string.format("Start cycle %d", c));
@@ -23,8 +23,8 @@ for c=1,cycle do
         print("Start train");
 		model_train();
 
-		local Reward-to-go=train.Reward:sum()/train.Reward:size(1)
-        print(string.format("Average Reward to go %6.6f",Reward-to-go));
+	Reward_to_go=train.Reward:sum()/train.Reward:size(1)
+        print(string.format("Average Reward to go %6.6f",Reward_to_go));
         print("Save model");
 		torch.save(wkdir.."Model_ValueNet",ValueNet);
 		torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
@@ -39,6 +39,6 @@ for c=1,cycle do
 		torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
         torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);
         torch.save(wkdir.."Model_CNV_Model",CNV_Model);
-		torch.save(wkdir.."End_Point_Model",End_Point_Model);
+		torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
 	end
 end
