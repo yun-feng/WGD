@@ -30,7 +30,7 @@ for c=0,cycle do
 		torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
         torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);
         torch.save(wkdir.."Model_CNV_Model",CNV_Model);
-		torch.save(wkdir.."End_Point_Model",End_Point_Model);
+		torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
 	else
 		flag=0;
 		LoadData(flag);
