@@ -82,9 +82,8 @@ LoadData=function(flag)
 	
 	--sample end point
 	End_Point_Model:forward({train.chrom_state,train.chrom_state_new})
-	train.End=torch.Tensor(train.state:size(1));
+	train.End=torch.zeros(train.state:size(1));
 	for i=1,train.End:size(1)do
-		train.End[i]=0;
 		if train.ChrA[i]>2 then
 			temp=torch.rand(1)[1];
 			while temp>0 do
