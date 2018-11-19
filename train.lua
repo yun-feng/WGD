@@ -76,8 +76,8 @@ feval_Val_eval=function(x)
     
 	--normalization for kernal 
     for i = 1,#ValueNet_eval.modules do
-        if string.find(tostring(ValueNet.modules[i]), 'SpatialConvolution') then
-                ValueNet.modules[i].weight:renorm(2,1,opt.KernelMax)
+        if string.find(tostring(ValueNet_eval.modules[i]), 'SpatialConvolution') then
+                ValueNet_eval.modules[i].weight:renorm(2,1,opt.KernelMax)
         end
     end
     
