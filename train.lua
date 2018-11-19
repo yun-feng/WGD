@@ -111,9 +111,8 @@ feval_Chrom=function(x)
     
 	local grad=torch.zeros(Chrom_Model.output:size())
 	for i= 1,grad:size(1) do
-		grad[i][train.ChrA[i]]=train.Advantage[i]
+		grad[i][train.ChrA[i]]=train.Advantage[i]/Chrom_Model.output[i][train.ChrA[i]]
 	end
-	grad=torch.cdiv(grad,Chrom_Model.output);
 	
     Chrom_Model:backward(train.state,grad);
     
@@ -142,10 +141,9 @@ feval_CNV=function(x)
 	local grad=torch.zeros(CNV_Model.output:size())
 	for i= 1,grad:size(1) do
 		if train.ChrA[i]>2 then
-			grad[i][train.CNV[i]]=train.Advantage[i]
+			grad[i][train.CNV[i]]=train.Advantage[i]/CNV_Model.output[i][train.CNV[i]]
 		end
 	end
-	grad=torch.cdiv(grad,CNV_Model.output);
 	
     CNV_Model:backward({train.state,train.chrom_state},grad);
     
@@ -174,10 +172,9 @@ feval_End=function(x)
 	local grad=torch.zeros(End_Point_Model.output:size())
 	for i= 1,grad:size(1) do
 		if train.ChrA[i]>2 then
-			grad[i][train.End[i]]=train.Advantage[i]
+			grad[i][train.End[i]]=train.Advantage[i]/End_Point_Model.output[i][train.End[i]]
 		end
 	end
-	grad=torch.cdiv(grad,End_Point_Model.output);
 	
     End_Point_Model:backward({train.chrom_state,train.chrom_state_new},grad);
     
