@@ -113,6 +113,13 @@ LoadData=function(flag)
 				train.next[i][2][j][1]=train.next[i][2][j][1]+CNV_action[cnv_a][2];
 			end
 		end
+		if(train.ChrA[i]>2 and not endL) then
+			print(startL);
+			print(endL);
+			print(train.ChrA[i]);
+			print(train.CNV[i]);
+			print(train.End[i]);
+		end
 		train.Reward[i]=Reward(train.ChrA[i],startL,endL,train.state[i],train.next[i])
 	end	
 	train.Advantage=torch.Tensor(train.state:size(1));
