@@ -61,7 +61,7 @@ feval_Val=function(x)
     end
     
 	local f=0.5*train.Advantage:pow(2);
-	ValueNet:backward(train.state,-torch.Tensor(train.Advantage):resize(train.Advantage:size(1),1));
+	ValueNet:backward(train.state,torch.Tensor(train.Advantage):resize(train.Advantage:size(1),1));
     return f,parGrad_Val;
 end
 
