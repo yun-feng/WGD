@@ -58,12 +58,10 @@ LoadData=function(flag)
 	--sample cnv
 	--prepare potential cnp
 	CNV_Model:forward({train.state,train.chrom_state})
-	train.CNV=torch.Tensor(train.state:size(1));
-	train.StartL=torch.Tensor(train.state:size(1));
+	train.CNV=torch.zeros(train.state:size(1));
+	train.StartL=torch.zeros(train.state:size(1));
 	train.chrom_state_new=torch.Tensor(train.state:size(1),nfeats,chrom_width,1);
-	for i=1,train.CNV:size(1)do
-		train.CNV[i]=0;
-		train.StartL[i]=0;
+	for i=1,train.CNV:size(1) do
 		train.chrom_state_new[i]=train.chrom_state[i];
 		if train.ChrA[i]>2 then
 			temp=torch.rand(1)[1];
@@ -112,7 +110,7 @@ LoadData=function(flag)
 			cnv_a=train.CNV[i]%CNV_action:size(1)+1;
 			for j=startL,endL do
 				train.next[i][1][j][1]=train.next[i][1][j][1]+CNV_action[cnv_a][1];
-				train.next[i][2][j][1]=train.next[i][1][j][1]+CNV_action[cnv_a][2];
+				train.next[i][2][j][1]=train.next[i][2][j][1]+CNV_action[cnv_a][2];
 			end
 		end
 		train.Reward[i]=Reward(train.ChrA[i],startL,endL,train.state[i],train.next[i])

@@ -3,11 +3,11 @@ require "nn"
 require "math"
 
 single_loci_loss=1-1e-4;
-Half_Chromosome_CNV=1-0.6;
-Whole_Chromosome_CNV=1-0.3;
+Half_Chromosome_CNV=1-0.4;
+Whole_Chromosome_CNV=1-0.5;
 WGD=0.6;
-const1=1;
-const2=0.1;
+const1=1-1e-4;
+const2=1;
 
 Reward=function(ChrA,StartL,EndL,StartS,EndS)
 	local reward;
