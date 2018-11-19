@@ -83,7 +83,7 @@ feval_Val_eval=function(x)
     
 	
 	local f=0.5*torch.norm(par_Val-par_Val_eval)^2;
-	parGrad_Val_eval=par_Val-par_Val_eval;
+	parGrad_Val_eval=-par_Val+par_Val_eval;
     
     return f,parGrad_Val_eval;
 end
