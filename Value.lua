@@ -35,7 +35,7 @@ ValueNet:add(nn.Threshold(0, 1e-6))
 nchannel = math.floor((math.floor((width)/4.0))/4.0)
 ValueNet:add(nn.Reshape(nkernels[3]*nchannel))
 ValueNet:add(nn.Linear(nkernels[3]*nchannel, nkernels[4]))
-ValueNet:add(nn.SoftMax())
+ValueNet:add(nn.Tanh())
 --ValueNet:add(nn.Linear(nkernels[4], nkernels[4]))
 ValueNet:add(nn.Linear(nkernels[4] , 1))
 
