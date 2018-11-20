@@ -69,7 +69,7 @@ LoadData=function(flag)
 				train.CNV[i]=train.CNV[i]+1;
 				temp=temp-CNV_Model.output[i][train.CNV[i]];
 			end
-			train.StartL[i]=math.floor(train.CNV[i]/CNV_action:size(1))+1;
+			train.StartL[i]=math.ceil(train.CNV[i]/CNV_action:size(1));
 			cnv_a=train.CNV[i]%CNV_action:size(1)+1;
 			for j=train.StartL[i],chrom_width do
 				train.chrom_state_new[i][1][j][1]=train.chrom_state_new[i][1][j][1]+CNV_action[cnv_a][1]
@@ -112,13 +112,6 @@ LoadData=function(flag)
 				train.next[i][1][j][1]=train.next[i][1][j][1]+CNV_action[cnv_a][1];
 				train.next[i][2][j][1]=train.next[i][2][j][1]+CNV_action[cnv_a][2];
 			end
-		end
-		if(train.ChrA[i]>2 and not endL) then
-			print(startL);
-			print(endL);
-			print(train.ChrA[i]);
-			print(train.CNV[i]);
-			print(train.End[i]);
 		end
 		train.Reward[i]=Reward(train.ChrA[i],startL,endL,train.state[i],train.next[i])
 	end	

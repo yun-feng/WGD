@@ -41,4 +41,10 @@ for c=0,cycle do
         torch.save(wkdir.."Model_CNV_Model",CNV_Model);
 		torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
 	end
+	if c%100==0 then
+		flag=0;
+		train.next=torch.ones(1,2,22*50,1)
+		LoadData(flag);
+		model_train();
+	end
 end

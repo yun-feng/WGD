@@ -23,7 +23,7 @@ function deepcopy(orig)
 end
 
 opt.State_Val = {
-   learningRate=0.001,
+   learningRate=0.0001,
    learningRateDecay=1e-5,
    weightDecay=1e-6,
    beta1=0.9,
@@ -36,6 +36,7 @@ opt.State_Val_eval.learningRate=0.05
 opt.State_Chrom=deepcopy(opt.State_Val)
 opt.State_CNV=deepcopy(opt.State_Val)
 opt.State_End=deepcopy(opt.State_Val)
+opt.State_Val.learningRate=0.001
 
 opt.Method = optim.adam;
 
@@ -60,7 +61,7 @@ feval_Val=function(x)
         end
     end
     
-	local f=0.5*train.Advantage:pow(2);
+	local f=0.5*torch.pow(train.Advantage,2);
 	ValueNet:backward(train.state,torch.Tensor(train.Advantage):resize(train.Advantage:size(1),1));
     return f,parGrad_Val;
 end
@@ -110,7 +111,7 @@ feval_Chrom=function(x)
     
 	local grad=torch.zeros(Chrom_Model.output:size())
 	for i= 1,grad:size(1) do
-		grad[i][train.ChrA[i]]=train.Advantage[i]/Chrom_Model.output[i][train.ChrA[i]]
+		grad[i][train.ChrA[i]]=-train.Advantage[i]/Chrom_Model.output[i][train.ChrA[i]]
 	end
 	
     Chrom_Model:backward(train.state,grad);
@@ -140,7 +141,7 @@ feval_CNV=function(x)
 	local grad=torch.zeros(CNV_Model.output:size())
 	for i= 1,grad:size(1) do
 		if train.ChrA[i]>2 then
-			grad[i][train.CNV[i]]=train.Advantage[i]/CNV_Model.output[i][train.CNV[i]]
+			grad[i][train.CNV[i]]=-train.Advantage[i]/CNV_Model.output[i][train.CNV[i]]
 		end
 	end
 	
@@ -171,7 +172,7 @@ feval_End=function(x)
 	local grad=torch.zeros(End_Point_Model.output:size())
 	for i= 1,grad:size(1) do
 		if train.ChrA[i]>2 then
-			grad[i][train.End[i]]=train.Advantage[i]/End_Point_Model.output[i][train.End[i]]
+			grad[i][train.End[i]]=-train.Advantage[i]/End_Point_Model.output[i][train.End[i]]
 		end
 	end
 	
