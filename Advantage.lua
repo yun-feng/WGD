@@ -2,7 +2,7 @@ require "torch"
 require "nn"
 require "math"
 
-single_loci_loss=1-1e-4;
+single_loci_loss=1-1e-2;
 Half_Chromosome_CNV=1-0.4;
 Whole_Chromosome_CNV=1-0.5;
 WGD=0.6;
@@ -13,7 +13,7 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 	local reward;
 	if ChrA==1 then
 		reward=torch.sum(torch.abs(StartS-1))*math.log(single_loci_loss);
-	elseif chrA==2 then
+	elseif ChrA==2 then
 		reward=torch.sum(torch.abs(StartS-2*EndS))*math.log(single_loci_loss);
 		reward=reward+math.log(WGD);
 		reward=reward-ValueNet_eval:forward(EndS);
