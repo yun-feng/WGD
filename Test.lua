@@ -10,9 +10,9 @@ train={}
 
 dofile (wkdir.."Value.lua");
 dofile (wkdir.."Policy.lua");
-dofile (wkdir.."Advantage.lua");
-dofile (wkdir.."train.lua");
-dofile (wkdir.."data.lua");
+--dofile (wkdir.."Advantage.lua");
+--dofile (wkdir.."train.lua");
+--dofile (wkdir.."data.lua");
 
 ValueNet=torch.load(wkdir.."Model_ValueNet");
 ValueNet_eval=torch.load(wkdir.."Model_ValueNet_eval");
@@ -20,6 +20,16 @@ Chrom_Model=torch.load(wkdir.."Model_Chrom_Model");
 CNV_Model=torch.load(wkdir.."Model_CNV_Model");
 End_Point_Model=torch.load(wkdir.."Model_End_Point_Model");
 
+dofile (wkdir.."Advantage.lua");
+dofile (wkdir.."train.lua");
+dofile (wkdir.."data.lua");
+
 train.next=torch.ones(1,2,22*50,1)
 flag=false
+LoadData(flag)
+
+train.next=torch.ones(1,2,22*50,1)
+for i =1,10 do
+	train.next[1][1][i][1]=0
+end
 LoadData(flag)
