@@ -36,7 +36,7 @@ opt.State_Val_eval.learningRate=0.05
 opt.State_Chrom=deepcopy(opt.State_Val)
 opt.State_CNV=deepcopy(opt.State_Val)
 opt.State_End=deepcopy(opt.State_Val)
-opt.State_Val.learningRate=0.001
+--opt.State_Val.learningRate=0.001
 
 opt.Method = optim.adam;
 

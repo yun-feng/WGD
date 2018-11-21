@@ -2,11 +2,11 @@ require "torch"
 require "nn"
 require "math"
 
-single_loci_loss=1-1e-2;
+single_loci_loss=1-2e-1;
 Half_Chromosome_CNV=1-0.4;
 Whole_Chromosome_CNV=1-0.5;
 WGD=0.6;
-const1=1-1e-4;
+const1=1-2e-1;
 const2=1;
 
 Reward=function(ChrA,StartL,EndL,StartS,EndS)
