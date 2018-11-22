@@ -54,7 +54,9 @@ LoadData=function(flag)
 		end
 		train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i])
 	end
-	
+	if counter<100 then
+		train.ChrA=torch.ones(train.state:size(1))	
+	end
 	--sample cnv
 	--prepare potential cnp
 	CNV_Model:forward({train.state,train.chrom_state})

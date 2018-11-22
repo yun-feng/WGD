@@ -38,7 +38,7 @@ ValueNet:add(nn.Linear(nkernels[3]*nchannel, nkernels[4]))
 ValueNet:add(nn.ReLU())
 --ValueNet:add(nn.Linear(nkernels[4], nkernels[4]))
 ValueNet:add(nn.Linear(nkernels[4] , 1))
-ValueNet:add(nn.AddConstant(600))
+ValueNet:add(nn.AddConstant(1500))
 ValueNet:add(nn.ELU(0.2))
 ValueNet:add(nn.AddConstant(0.2))
 

@@ -14,12 +14,12 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 	opt.ChrA[ChrA]=opt.ChrA[ChrA]+1
 	if ChrA==1 then
 		reward=torch.sum(torch.abs(StartS-1))*math.log(single_loci_loss);
-		reward=reward+math.sqrt(math.log(c+1)/opt.ChrA[ChrA])
+		reward=reward+math.sqrt(math.log(counter+1)/opt.ChrA[ChrA])
 	elseif ChrA==2 then
 		reward=torch.sum(torch.abs(StartS-2*EndS))*math.log(single_loci_loss);
 		reward=reward+math.log(WGD);
 		reward=reward-ValueNet_eval:forward(EndS);
-		reward=reward+math.sqrt(math.log(c+1)/opt.ChrA[ChrA])
+		reward=reward+math.sqrt(math.log(counter+1)/opt.ChrA[ChrA])
 	else
 		opt.StartL[StartL]=opt.StartL[StartL]+1
 		opt.End[EndL]=opt.End[EndL]+1
@@ -32,7 +32,7 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 			end
 		end
 		reward=reward-(ValueNet_eval:forward(EndS))[1];
-		reward=reward+math.sqrt(math.log(c+1)/(opt.StartL[StartL]*opt.End[EndL])^(1/2))
+		reward=reward+math.sqrt(math.log(counter+1)/(opt.StartL[StartL]*opt.End[EndL])^(1/2))
 	end
 
 	return reward;
