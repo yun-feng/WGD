@@ -8,6 +8,10 @@ wkdir="/data/ted/WGD/"
 
 dofile (wkdir.."Value.lua");
 dofile (wkdir.."Policy.lua");
+
+ValueNet=torch.load(wkdir.."Model_ValueNet")
+ValueNet_eval=ValueNet:clone()
+
 dofile (wkdir.."Advantage.lua");
 dofile (wkdir.."train.lua");
 dofile (wkdir.."data.lua");
