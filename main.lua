@@ -9,7 +9,7 @@ wkdir="/data/ted/WGD/"
 dofile (wkdir.."Value.lua");
 dofile (wkdir.."Policy.lua");
 
-ValueNet=torch.load(wkdir.."Model_ValueNet")
+ValueNet=torch.load(wkdir.."Model_ValueNet_eval2")
 ValueNet_eval=ValueNet:clone()
 
 dofile (wkdir.."Advantage.lua");
@@ -40,7 +40,7 @@ for c=0,cycle do
         	torch.save(wkdir.."Model_CNV_Model",CNV_Model);
 		torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
 	else
-		flag=0;
+		flag=false;
 		LoadData(flag);
 		Val_train();
 		torch.save(wkdir.."Model_ValueNet",ValueNet);
@@ -50,7 +50,7 @@ for c=0,cycle do
 	--	torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
 	end
 	if c%100==0 then
-		flag=0;
+		flag=false;
 		train.next=torch.ones(1,2,22*50,1)
 		LoadData(flag);
 		model_train();
