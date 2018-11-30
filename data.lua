@@ -14,7 +14,7 @@ end
 
 CNV_action=torch.Tensor({{1,0},{-1,0},{1,-1},{0,1},{0,-1}})
 
-LoadData=function(flag)
+LoadData=function(flag,flag2)
 	--when flag is true, load data from file
 	--otherwise use the next state as input
 	if flag then
@@ -54,7 +54,7 @@ LoadData=function(flag)
 		end
 		train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i])
 	end
-	if counter<100 then
+	if flag2 then
 		train.ChrA=torch.ones(train.state:size(1))	
 	end
 	--sample cnv
