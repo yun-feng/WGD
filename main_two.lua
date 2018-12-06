@@ -64,7 +64,7 @@ for c=0,cycle do
                 torch.save(wkdir.."Model_CNV_Model",CNV_Model);
                 torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
 	else
-		opt.State_Val_eval.learningRate=0.01
+		opt.State_Val_eval.learningRate=0.001
 		if torch.rand(1)[1]>0.03 then
                         flag=1;
                 else

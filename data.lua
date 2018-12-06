@@ -111,8 +111,8 @@ LoadData=function(flag,flag2)
 			end
 			cnv_a=train.CNV[i]%CNV_action:size(1)+1;
 			for j=startL,endL do
-				train.next[i][1][j][1]=train.next[i][1][j][1]+CNV_action[cnv_a][1];
-				train.next[i][2][j][1]=train.next[i][2][j][1]+CNV_action[cnv_a][2];
+				train.next[i][1][j][1]=math.max(0,train.next[i][1][j][1]+CNV_action[cnv_a][1]);
+				train.next[i][2][j][1]=math.max(0,train.next[i][2][j][1]+CNV_action[cnv_a][2]);
 			end
 		end
 		train.Reward[i]=Reward(train.ChrA[i],startL,endL,train.state[i],train.next[i])
