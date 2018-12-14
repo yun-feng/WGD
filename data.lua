@@ -124,3 +124,47 @@ LoadData=function(flag,flag2)
 	train.Advantage=torch.Tensor(train.state:size(1));
 	Advantage_cal();
 end
+
+LoadData_Val=function()
+	--when flag is true, load data from file
+	--otherwise use the next state as input
+	
+	
+	local temp
+	--temp,train.ChrA=torch.max(ChromNet:forward(train.state),2)
+	--sample chromosome
+	--Extract the cnp for the chromosome
+	train.ChrA=torch.floor(torch.rand(train.state:size(1))*24)+1
+	
+	--sample cnv
+	--prepare potential cnp
+	train.CNV=torch.floor(torch.rand(train.state:size(1))*5*chrom_width)+1
+	train.StartL=torch.floor(torch.rand(train.state:size(1))*chrom_width)+1
+	
+	--sample end point
+	train.End=torch.floor(torch.rand(train.state:size(1))*chrom_width)+1
+	
+	--Compute CNP at the next time point
+	--Compute Reward-to-go and Advantage
+	train.next=train.state:clone();
+	train.Reward=torch.Tensor(train.state:size(1));
+	local startL,endL;
+	for i=1,train.Reward:size(1) do
+		if train.ChrA[i]==2 then
+			train.next[i]=(train.next[i]/2):floor()
+		elseif train.ChrA[i]>2 then
+			startL=chrom_width*(train.ChrA[i]-3)+train.StartL[i];
+			endL=chrom_width*(train.ChrA[i]-3)+train.End[i];
+			if(startL>endL) then
+				local temp=startL
+				startL=endL
+				endL=temp
+			end
+			cnv_a=train.CNV[i]%CNV_action:size(1)+1;
+			for j=startL,endL do
+				train.next[i][1][j][1]=math.max(0,train.next[i][1][j][1]+CNV_action[cnv_a][1]);
+				train.next[i][2][j][1]=math.max(0,train.next[i][2][j][1]+CNV_action[cnv_a][2]);
+			end
+		end
+	end	
+end

@@ -41,7 +41,7 @@ for c=0,cycle do
                 print("Save model");
                 torch.save(wkdir.."Model_ValueNet",ValueNet);
                 torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
-		LoadData(flag,false);
+		LoadData_Val();
 	elseif(torch.floor(counter/1000)%3==1) then
 		if not flag_up then
 			flag_up=1;
@@ -82,5 +82,6 @@ for c=0,cycle do
                 torch.save(wkdir.."Model_ValueNet",ValueNet);
                 torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
 		flag_up=false;
+                LoadData_Val();
 	end
 end
