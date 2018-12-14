@@ -19,15 +19,17 @@ dofile (wkdir.."data.lua");
 cycle=100000000
 counter=0;
 LoadData(1,1);
+flag_up=false;
 
 for c=0,cycle do
 	counter=counter+1;
 	--remember baseline for first 1000 steps.
 	if(counter<1000) then
-		if torch.rand(1)[1]>0.03 then
+		opt.State_Val_eval.learningRate=1;
+		if torch.rand(1)[1]>0.9 then
                         flag=1;
                 else
-                        flag=0;
+                        flag=false;
 		end
 		print(string.format("Start cycle %d", c));
                 print("Loading data");
@@ -39,11 +41,17 @@ for c=0,cycle do
                 print("Save model");
                 torch.save(wkdir.."Model_ValueNet",ValueNet);
                 torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
-	elseif(torch.ceil(counter/1000)%2==1) then
-		if torch.rand(1)[1]>0.03 then
+		LoadData(flag,false);
+	elseif(torch.floor(counter/1000)%3==1) then
+		if not flag_up then
+			flag_up=1;
+			print("Update Eval Net")
+			ValueNet_eval=ValueNet:clone()
+		end
+		if torch.rand(1)[1]>0.99 then
                         flag=1;
                 else
-                        flag=0;
+                        flag=false;
                 end
 		print(string.format("Start cycle %d", c));
                 print("Loading data");
@@ -52,15 +60,16 @@ for c=0,cycle do
 		Policy_train();
                 Reward_to_go=train.Reward:sum()/train.Reward:size(1)
                 print(string.format("Average Reward to go %6.6f",Reward_to_go));
-                print("Save model");
+                print("Save policy model");
                 torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);
                 torch.save(wkdir.."Model_CNV_Model",CNV_Model);
                 torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
 	else
-		if torch.rand(1)[1]>0.03 then
+		opt.State_Val_eval.learningRate=0.000
+		if torch.rand(1)[1]>0.99 then
                         flag=1;
                 else
-                        flag=0;
+                        flag=false;
                 end
                 print(string.format("Start cycle %d", c));
                 print("Loading data");
@@ -69,8 +78,9 @@ for c=0,cycle do
                 Val_train();
                 Reward_to_go=train.Reward:sum()/train.Reward:size(1)
                 print(string.format("Average Reward to go %6.6f",Reward_to_go));
-                print("Save model");
+                print("Save value model");
                 torch.save(wkdir.."Model_ValueNet",ValueNet);
                 torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
+		flag_up=false;
 	end
 end
