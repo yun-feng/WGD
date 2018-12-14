@@ -17,24 +17,28 @@ CNV_action=torch.Tensor({{1,0},{-1,0},{1,-1},{0,1},{0,-1}})
 LoadData=function(flag,flag2)
 	--when flag is true, load data from file
 	--otherwise use the next state as input
-	if flag then
-		cnp={}
-		cnpfile = io.open(cnp_file,"r")
-		if cnpfile then
-			local counter=0;
-			local x=torch.floor(torch.rand(1)*10)[1]
-			for cnpline in cnpfile:lines() do
-				if((math.floor(counter/2))%10==x) then
-					table.insert(cnp,cnpline:split("\t"));
-				end
-				counter=counter+1;
+	cnp={}
+	cnpfile = io.open(cnp_file,"r")
+	if cnpfile then
+		local counter=0;
+		local x=torch.floor(torch.rand(1)*10)[1]
+		for cnpline in cnpfile:lines() do
+			if((math.floor(counter/2))%10==x) then
+				table.insert(cnp,cnpline:split("\t"));
 			end
-        	end
-		train.state=torch.Tensor(cnp);
-		cnp=nil;
-		train.state:resize(train.state:size(1)/2,2,train.state:size(2),1);
-	else
-		train.state=train.next;
+			counter=counter+1;
+		end
+        end
+	train.state=torch.Tensor(cnp);
+	cnp=nil;
+	train.state:resize(train.state:size(1)/2,2,train.state:size(2),1);
+
+	if not flag then
+		for i=1,train.state:size(1) do
+			if train.ChrA[i]>1 then
+				train.state[i]=train.next[i];
+			end
+		end
 	end
 	
 	

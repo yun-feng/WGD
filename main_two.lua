@@ -26,10 +26,10 @@ for c=0,cycle do
 	--remember baseline for first 1000 steps.
 	if(counter<1000) then
 		opt.State_Val_eval.learningRate=1;
-		if torch.rand(1)[1]>0.03 then
+		if torch.rand(1)[1]>0.9 then
                         flag=1;
                 else
-                        flag=0;
+                        flag=false;
 		end
 		print(string.format("Start cycle %d", c));
                 print("Loading data");
@@ -41,16 +41,17 @@ for c=0,cycle do
                 print("Save model");
                 torch.save(wkdir.."Model_ValueNet",ValueNet);
                 torch.save(wkdir.."Model_ValueNet_eval",ValueNet_eval);
+		LoadData(flag,false);
 	elseif(torch.floor(counter/1000)%3==1) then
 		if not flag_up then
 			flag_up=1;
 			print("Update Eval Net")
 			ValueNet_eval=ValueNet:clone()
 		end
-		if torch.rand(1)[1]>0.03 then
+		if torch.rand(1)[1]>0.99 then
                         flag=1;
                 else
-                        flag=0;
+                        flag=false;
                 end
 		print(string.format("Start cycle %d", c));
                 print("Loading data");
@@ -64,11 +65,11 @@ for c=0,cycle do
                 torch.save(wkdir.."Model_CNV_Model",CNV_Model);
                 torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
 	else
-		opt.State_Val_eval.learningRate=0.001
-		if torch.rand(1)[1]>0.03 then
+		opt.State_Val_eval.learningRate=0.000
+		if torch.rand(1)[1]>0.99 then
                         flag=1;
                 else
-                        flag=0;
+                        flag=false;
                 end
                 print(string.format("Start cycle %d", c));
                 print("Loading data");
