@@ -23,9 +23,9 @@ function deepcopy(orig)
 end
 
 opt.State_Val = {
-   learningRate=1e-5,
-   learningRateDecay=1e-7,
-   weightDecay=1e-8,
+   learningRate=1e-7,
+   learningRateDecay=1e-9,
+   weightDecay=1e-9,
    beta1=0.9,
    beta2=0.99,
    epsilon=1e-8
@@ -41,7 +41,7 @@ opt.Method_eval=optim.sgd;
 opt.State_Chrom=deepcopy(opt.State_Val)
 opt.State_CNV=deepcopy(opt.State_Val)
 opt.State_End=deepcopy(opt.State_Val)
---opt.State_Val.learningRate=0.001
+opt.State_Val.learningRate=1e-5
 
 opt.Method = optim.adam;
 
