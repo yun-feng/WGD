@@ -29,7 +29,7 @@ for c=0,cycle do
 	LoadData(flag);
     print("Start train");
 	model_train();
-	Error=torch.sum(torch.pow(train.Advantage,2))/train.Advantage:size(1)
+	Error=torch.log(torch.sum(torch.pow(train.Advantage,2))/train.Advantage:size(1))
     print(string.format("Error: %6.6f",Error));
     print("Save model");
     torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);

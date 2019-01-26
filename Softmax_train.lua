@@ -23,15 +23,14 @@ function deepcopy(orig)
 end
 
 opt.State_Chrom = {
-   learningRate=1e-5,
+   learningRate=5e-6,
    learningRateDecay=1e-7,
    weightDecay=1e-8,
    beta1=0.9,
    beta2=0.99,
-   epsilon=1e-8
+   epsilon=1e-9
 }
 
-opt.State_Chrom_s=deepcopy(opt.State_Chrom)
 opt.State_Chrom_n=deepcopy(opt.State_Chrom)
 opt.State_CNV=deepcopy(opt.State_Chrom)
 opt.State_End=deepcopy(opt.State_Chrom)
