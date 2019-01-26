@@ -14,7 +14,7 @@ dofile (wkdir.."data.lua");
 
 cycle=100000000
 counter=0;
-Loaddata(true)
+LoadData(true)
 
 for c=0,cycle do
 	counter=counter+1;

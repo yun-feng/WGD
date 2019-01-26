@@ -2,7 +2,7 @@ require "torch"
 
 require "math"
 
-cnp_file=(wkdir.."Simulation_cnp.txt")
+cnp_file=("/data/ted/WGD/Simulation_cnp.txt")
 
 chrom_extract=function(cnp,chrom)
 	if chrom<=2 then
@@ -74,7 +74,7 @@ LoadData=function(flag)
 	train.End=torch.zeros(train.state:size(1));
 	for i=1,train.End:size(1)do
 		if train.ChrA[i]>2 then
-			train.End[i]=train.StartL+torch.floor(torch.rand(1)[1]*(chrom_width-train.StartL+1));
+			train.End[i]=train.StartL[i]+torch.floor(torch.rand(1)[1]*(chrom_width-train.StartL[i]+1));
 		end
 	end
 	

@@ -3,11 +3,11 @@ require "nn"
 require "math"
 
 normal_const=5e-6;
-single_loci_loss=(1-2e-1);
-Half_Chromosome_CNV=(1-0.4);
-Whole_Chromosome_CNV=(1-0.5);
-WGD=0.6;
-const1=(1-1e-1);
+single_loci_loss=normal_const*(1-2e-1);
+Half_Chromosome_CNV=normal_const*(1-0.4);
+Whole_Chromosome_CNV=normal_const*(1-0.5);
+WGD=normal_const*0.6;
+const1=normal_const*(1-1e-1);
 const2=5;
 
 Reward=function(ChrA,StartL,EndL,StartS,EndS)
@@ -31,7 +31,6 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 end
 
 Advantage_cal=function()
-	train.Advantage=train.Reward+math.log(normal_const);
 	Chrom_Model:forward(train.next)
 	train.Advantage=train.Advantage-torch.log(Chrom_Model.output:select(2,1))
 	Chrom_Model:forward(train.state)	
