@@ -64,7 +64,7 @@ feval_Chrom=function(x)
 	local grad=torch.zeros(Chrom_Model.output:size())
 	for i= 1,grad:size(1) do
 		grad[i][train.ChrA[i]]=-train.Advantage[i]/(Chrom_Model.output[i][train.ChrA[i]]*train.Advantage:size(1))
-		 grad[i][1]=-train.Advantage[i]/(Chrom_Model.output[i][1]*train.Advantage:size(1))
+		 grad[i][1]=train.Advantage[i]/(Chrom_Model.output[i][1]*train.Advantage:size(1))
 	end
 	
     Chrom_Model:backward(train.state,grad);
