@@ -34,7 +34,7 @@ Chrom_Net:add(nn.Reshape(nkernels[3]*nchannel))
 Chrom_Net:add(nn.Linear(nkernels[3]*nchannel, nkernels[4]))
 Chrom_Net:add(nn.Threshold(0, 1e-6))
 Chrom_Net:add(nn.Linear(nkernels[4] ,nkernels[4]))
-Chrom_Net:add(nn.SoftMax())
+--Chrom_Net:add(nn.SoftMax())
 
 Chrom_Model=Chrom_Net;
 

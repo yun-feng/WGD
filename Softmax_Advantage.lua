@@ -32,14 +32,15 @@ end
 
 Advantage_cal=function()
 	Chrom_Model:forward(train.next)
-	train.Advantage=train.Reward-torch.log(Chrom_Model.output:select(2,1))
+	train.Advantage=train.Reward-(Chrom_Model.output:select(2,1))
+	train.Advantage=train.Advantage+torch.log(torch.exp(Chrom_Model.output):sum(2))
 	Chrom_Model:forward(train.state)	
-	train.Advantage=train.Advantage+torch.log(Chrom_Model.output:select(2,1))
+	train.Advantage=train.Advantage+(Chrom_Model.output:select(2,1))
 
 	CNV_Model:forward({train.state,train.chrom_state})
 	End_Point_Model:forward({train.chrom_state,train.chrom_state_new})
 	for i = 1,train.state:size(1) do
-		train.Advantage[i]=train.Advantage[i]-torch.log(Chrom_Model.output[i][train.ChrA[i]])
+		train.Advantage[i]=train.Advantage[i]-(Chrom_Model.output[i][train.ChrA[i]])
 		if train.ChrA[i]>2 then
 			train.Advantage[i]=train.Advantage[i]-torch.log(CNV_Model.output[i][train.CNV[i]])
 			train.Advantage[i]=train.Advantage[i]-torch.log(End_Point_Model.output[i][train.End[i]])
