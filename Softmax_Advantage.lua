@@ -33,7 +33,7 @@ end
 Advantage_cal=function()
 	Chrom_Model:forward(train.next)
 	train.Advantage=train.Reward-(Chrom_Model.output:select(2,1))
-	train.Advantage=train.Advantage+torch.log(torch.exp(Chrom_Model.output):sum(2))
+	train.Advantage=train.Advantage+Chrom_Model.output:max(2)+torch.log(torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2))):sum(2))
 	Chrom_Model:forward(train.state)	
 	train.Advantage=train.Advantage+(Chrom_Model.output:select(2,1))
 

@@ -23,7 +23,7 @@ function deepcopy(orig)
 end
 
 opt.State_Chrom = {
-   learningRate=4e-6,
+   learningRate=1e-5,
    learningRateDecay=1e-7,
    weightDecay=1e-8,
    beta1=0.9,
@@ -175,7 +175,7 @@ function model_train()
     
 	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
     local temp,losses=opt.Method(feval_Chrom_n,par_Chrom,opt.State_Chrom_n);
-	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
-	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
+--	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
+--	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 	
 end

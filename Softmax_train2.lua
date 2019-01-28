@@ -23,7 +23,7 @@ function deepcopy(orig)
 end
 
 opt.State_Chrom = {
-   learningRate=1e-5,
+   learningRate=5e-5,
    learningRateDecay=1e-7,
    weightDecay=1e-8,
    beta1=0.9,
@@ -74,9 +74,11 @@ feval_Chrom=function(x)
     Chrom_Model:forward(train.next)
 
     Chrom_Model:zeroGradParameters();
+    local grad=torch.zeros(Chrom_Model.output:size())
     for i= 1,grad:size(1) do
         grad[i][1]=-train.Advantage[i]/(train.Advantage:size(1))
         local temp=torch.log(torch.exp(Chrom_Model.output[i]):sum())
+	temp=temp/train.Advantage:size(1)
         for j =1,24 do
                 grad[i][j]=grad[i][j]+train.Advantage[i]*torch.exp(Chrom_Model.output[i][j])/temp
         end
@@ -157,7 +159,7 @@ end
 function model_train()
     
 	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
-	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
-	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
+--	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
+--	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 	
 end
