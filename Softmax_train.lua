@@ -23,18 +23,17 @@ function deepcopy(orig)
 end
 
 opt.State_Chrom = {
-   learningRate=1e-5,
+   learningRate=1e-4,
    learningRateDecay=1e-7,
    weightDecay=1e-8,
    beta1=0.9,
    beta2=0.99,
-   epsilon=1e-9
+   epsilon=1e-8
 }
 
-opt.State_Chrom_n=deepcopy(opt.State_Chrom)
 opt.State_CNV=deepcopy(opt.State_Chrom)
 
-opt.State_CNV.learningRate=4e-4
+opt.State_CNV.learningRate=1e-3
 opt.State_End=deepcopy(opt.State_CNV)
 --opt.State_Val.learningRate=0.001
 
@@ -69,39 +68,24 @@ feval_Chrom=function(x)
 	end
 	
     Chrom_Model:backward(train.state,grad);
-    
-    return f,parGrad_Chrom;
-end
 
-feval_Chrom_n=function(x)
-    if x~=par_Chrom then
-        par_Chrom:copy(x)
-    end
-    
-    Chrom_Model:forward(train.next)
+    local par_cp=parGrad_Chrom:clone();
     
     Chrom_Model:zeroGradParameters();
-    
-    --normalization for kernal 
-    for i = 1,#Chrom_Model.modules do
-        if string.find(tostring(Chrom_Model.modules[i]), 'SpatialConvolution') then
-                Chrom_Model.modules[i].weight:renorm(2,1,opt.KernelMax)
-        end
-    end
-    
-    local f=train.Advantage;
-    
+    Chrom_Model:forward(train.next)
+
     local grad=torch.zeros(Chrom_Model.output:size())
     for i= 1,grad:size(1) do
         grad[i][1]=-train.Advantage[i]/(train.Advantage:size(1))
-	local temp=torch.log(torch.exp(Chrom_Model.output[i]):sum())
-	for j =1,24 do
-		grad[i][j]=grad[i][j]+train.Advantage[i]*torch.exp(Chrom_Model.output[i][j])/temp
-	end
+        local temp=Chrom_Model.output[i]:max()+torch.log(torch.exp(Chrom_Model.output[i]-Chrom_Model.output[i]:max()):sum())
+        for j =1,24 do
+                grad[i][j]=grad[i][j]+train.Advantage[i]*torch.exp(Chrom_Model.output[i][j]-temp)/train.Advantage:size(1)
+        end
     end
-    
+
     Chrom_Model:backward(train.next,grad);
-    
+    parGrad_Chrom=parGrad_Chrom+par_cp;
+
     return f,parGrad_Chrom;
 end
 
@@ -174,7 +158,6 @@ end
 function model_train()
     
 	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
-    local temp,losses=opt.Method(feval_Chrom_n,par_Chrom,opt.State_Chrom_n);
 --	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
 --	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 	
