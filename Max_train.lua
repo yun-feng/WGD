@@ -83,7 +83,7 @@ feval_Chrom=function(x)
     end
 
     Chrom_Model:backward(train.next,grad);
-    parGrad_Chrom=parGrad_Chrom+par_cp;
+    parGrad_Chrom:add(par_cp);
 
     return f,parGrad_Chrom;
 end

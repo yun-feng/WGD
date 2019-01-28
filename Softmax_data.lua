@@ -21,9 +21,9 @@ LoadData=function(flag)
 	cnpfile = io.open(cnp_file,"r")
 	if cnpfile then
 		local counter=0;
-		local x=torch.floor(torch.rand(1)*10)[1]
+		local x=torch.floor(torch.rand(1)*20)[1]
 		for cnpline in cnpfile:lines() do
-			if((math.floor(counter/2))%10==x) then
+			if((math.floor(counter/2))%20==x) then
 				table.insert(cnp,cnpline:split("\t"));
 			end
 			counter=counter+1;

@@ -18,7 +18,7 @@ CNV_Model=torch.load(wkdir.."Model_CNV_Model");
 End_Point_Model=torch.load(wkdir.."Model_End_Point_Model");
 
 dofile (wkdir.."Advantage.lua");
-dofile (wkdir.."train2.lua");
+dofile (wkdir.."train.lua");
 dofile (wkdir.."data.lua");
 
 train.next=torch.ones(1,2,22*50,1)

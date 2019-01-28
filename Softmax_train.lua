@@ -23,7 +23,7 @@ function deepcopy(orig)
 end
 
 opt.State_Chrom = {
-   learningRate=1e-4,
+   learningRate=5e-6,
    learningRateDecay=1e-7,
    weightDecay=1e-8,
    beta1=0.9,
@@ -33,8 +33,9 @@ opt.State_Chrom = {
 
 opt.State_CNV=deepcopy(opt.State_Chrom)
 
-opt.State_CNV.learningRate=1e-3
+opt.State_CNV.learningRate=2e-6
 opt.State_End=deepcopy(opt.State_CNV)
+opt.State_End.learningRate=1e-6
 --opt.State_Val.learningRate=0.001
 
 opt.Method = optim.adam;
@@ -84,7 +85,7 @@ feval_Chrom=function(x)
     end
 
     Chrom_Model:backward(train.next,grad);
-    parGrad_Chrom=parGrad_Chrom+par_cp;
+    parGrad_Chrom:add(par_cp);
 
     return f,parGrad_Chrom;
 end
@@ -107,16 +108,13 @@ feval_CNV=function(x)
     end
 	
     local f=train.Advantage;
-    
 	local grad=torch.zeros(CNV_Model.output:size())
 	for i= 1,grad:size(1) do
         if train.ChrA[i]>2 then
 		grad[i][train.CNV[i]]=-train.Advantage[i]/(CNV_Model.output[i][train.CNV[i]]*train.Advantage:size(1))
 	end
     end
-	
     CNV_Model:backward({train.state,train.chrom_state},grad);
-    
     return f,parGrad_CNV;
 end
 
@@ -156,9 +154,8 @@ feval_End=function(x)
 end
 
 function model_train()
-    
 	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
---	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
---	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
+	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
+	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 	
 end

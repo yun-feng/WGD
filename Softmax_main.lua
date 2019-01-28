@@ -26,8 +26,8 @@ for c=0,cycle do
 		
 	print(string.format("Start cycle %d", c));
     print("Loading data");
-	--LoadData(flag);
-Advantage_cal();
+	LoadData(flag);
+--Advantage_cal();
     print("Start train");
 	model_train();
 	Error=torch.log(torch.sum(torch.pow(train.Advantage,2))/train.Advantage:size(1))
