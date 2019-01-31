@@ -45,7 +45,7 @@ LoadData=function(flag)
 	--sample chromosome
 	--Extract the cnp for the chromosome
 	
-	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22+1))+2;
+	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22+1))+1;
 	train.chrom_state=torch.Tensor(train.state:size(1),nfeats,chrom_width,1);
 	for i=1,train.ChrA:size(1) do
 		train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i])
@@ -59,7 +59,7 @@ LoadData=function(flag)
 	train.chrom_state_new=torch.Tensor(train.state:size(1),nfeats,chrom_width,1);
 	for i=1,train.CNV:size(1) do
 		train.chrom_state_new[i]=train.chrom_state[i];
-		if train.ChrA[i]>2 then
+		if train.ChrA[i]>1 then
 			train.StartL[i]=math.ceil(train.CNV[i]/CNV_action:size(1));
 			cnv_a=train.CNV[i]%CNV_action:size(1)+1;
 			for j=train.StartL[i],chrom_width do
@@ -73,7 +73,7 @@ LoadData=function(flag)
 	
 	train.End=torch.zeros(train.state:size(1));
 	for i=1,train.End:size(1)do
-		if train.ChrA[i]>2 then
+		if train.ChrA[i]>1 then
 			train.End[i]=train.StartL[i]+torch.floor(torch.rand(1)[1]*(chrom_width-train.StartL[i]+1));
 		end
 	end
@@ -84,11 +84,11 @@ LoadData=function(flag)
 	train.Reward=torch.Tensor(train.state:size(1));
 	local startL,endL;
 	for i=1,train.Reward:size(1) do
-		if train.ChrA[i]==2 then
+		if train.ChrA[i]==1 then
 			train.next[i]=(train.next[i]/2):floor()
-		elseif train.ChrA[i]>2 then
-			startL=chrom_width*(train.ChrA[i]-3)+train.StartL[i];
-			endL=chrom_width*(train.ChrA[i]-3)+train.End[i];
+		elseif train.ChrA[i]>1 then
+			startL=chrom_width*(train.ChrA[i]-2)+train.StartL[i];
+			endL=chrom_width*(train.ChrA[i]-2)+train.End[i];
 			cnv_a=train.CNV[i]%CNV_action:size(1)+1;
 			for j=startL,endL do
 				train.next[i][1][j][1]=math.max(0,train.next[i][1][j][1]+CNV_action[cnv_a][1]);

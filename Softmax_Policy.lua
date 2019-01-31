@@ -8,7 +8,7 @@ height = 1
 ninputs = nfeats*width*height
 --nkernels = {320,480,960,100}
 chrom_width=width/22;
-nkernels = {160,240,480,22+2}
+nkernels = {160,240,480,22+1}
 
 
 --determin which chromosome to change

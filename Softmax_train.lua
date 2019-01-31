@@ -65,7 +65,6 @@ feval_Chrom=function(x)
 	local grad=torch.zeros(Chrom_Model.output:size())
 	for i= 1,grad:size(1) do
 		grad[i][train.ChrA[i]]=-train.Advantage[i]/(train.Advantage:size(1))
-		 grad[i][1]=train.Advantage[i]/(train.Advantage:size(1))
 	end
 	
     Chrom_Model:backward(train.state,grad);
@@ -77,8 +76,7 @@ feval_Chrom=function(x)
 
     local grad=torch.zeros(Chrom_Model.output:size())
     for i= 1,grad:size(1) do
-        grad[i][1]=-train.Advantage[i]/(train.Advantage:size(1))
-        local temp=Chrom_Model.output[i]:max()+torch.log(torch.exp(Chrom_Model.output[i]-Chrom_Model.output[i]:max()):sum())
+        local temp=Chrom_Model.output[i]:max()+torch.log(torch.exp(-(Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output[i]-Chrom_Model.output[i]:max()):sum())
         for j =1,24 do
                 grad[i][j]=grad[i][j]+train.Advantage[i]*torch.exp(Chrom_Model.output[i][j]-temp)/train.Advantage:size(1)
         end
@@ -110,7 +108,7 @@ feval_CNV=function(x)
     local f=train.Advantage;
 	local grad=torch.zeros(CNV_Model.output:size())
 	for i= 1,grad:size(1) do
-        if train.ChrA[i]>2 then
+        if train.ChrA[i]>1 then
 		grad[i][train.CNV[i]]=-train.Advantage[i]/(CNV_Model.output[i][train.CNV[i]]*train.Advantage:size(1))
 	end
     end
@@ -139,7 +137,7 @@ feval_End=function(x)
     
 	local grad=torch.zeros(End_Point_Model.output:size())
 	for i= 1,grad:size(1) do
-        	if train.ChrA[i]>2 then
+        	if train.ChrA[i]>1 then
         	    grad[i][train.End[i]]=-train.Advantage[i]/(End_Point_Model.output[i][train.End[i]]*train.Advantage:size(1))
         	    local temp=torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}])
         	    for j=train.StartL[i],chrom_width do

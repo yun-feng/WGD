@@ -12,7 +12,7 @@ const2=5;
 
 Reward=function(ChrA,StartL,EndL,StartS,EndS)
 	local reward;
-	if ChrA==2 then
+	if ChrA==1 then
 		reward=torch.sum(torch.abs(StartS-2*EndS))*math.log(single_loci_loss);
 		reward=reward+math.log(WGD);
 	else
@@ -33,16 +33,14 @@ end
 Advantage_cal=function()
 	Chrom_Model:forward(train.next)
 	train.Advantage=train.Reward
-	train.Advantage=train.Advantage-(Chrom_Model.output:select(2,1))
-	train.Advantage=train.Advantage+Chrom_Model.output:max(2)+torch.log(torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2)):expand(Chrom_Model.output:size())):sum(2))
+	train.Advantage=train.Advantage+Chrom_Model.output:max(2)+torch.log(torch.exp(C-(Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2)):expand(Chrom_Model.output:size())):sum(2))
 	Chrom_Model:forward(train.state)	
-	train.Advantage=train.Advantage+(Chrom_Model.output:select(2,1))
 
 	CNV_Model:forward({train.state,train.chrom_state})
 	End_Point_Model:forward({train.chrom_state,train.chrom_state_new})
 	for i = 1,train.state:size(1) do
 		train.Advantage[i]=train.Advantage[i]-(Chrom_Model.output[i][train.ChrA[i]])
-		if train.ChrA[i]>2 then
+		if train.ChrA[i]>1 then
 			train.Advantage[i]=train.Advantage[i]-torch.log(CNV_Model.output[i][train.CNV[i]])
 			train.Advantage[i]=train.Advantage[i]-torch.log(End_Point_Model.output[i][train.End[i]])
 			train.Advantage[i]=train.Advantage[i]+torch.log(torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}]))
