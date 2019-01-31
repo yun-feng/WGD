@@ -48,6 +48,8 @@ LoadData=function(flag)
 	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22+1))+1;
 	train.chrom_state=torch.Tensor(train.state:size(1),nfeats,chrom_width,1);
 	for i=1,train.ChrA:size(1) do
+	--	if(torch.rand(1)[1]>0.9) then
+	--		train.ChrA[i]=1
 		train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i])
 	end
 	

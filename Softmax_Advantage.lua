@@ -25,17 +25,18 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 			end
 		end
 	end
-	reward=reward+torch.sum(torch.abs(EndS-1))*math.log(single_loci_loss);
-	reward=reward-torch.sum(torch.abs(StartS-1))*math.log(single_loci_loss);
+	--reward=reward+torch.sum(torch.abs(EndS-1))*math.log(single_loci_loss);
+	--reward=reward-torch.sum(torch.abs(StartS-1))*math.log(single_loci_loss);
 	return reward;
 end
 
 Advantage_cal=function()
 	Chrom_Model:forward(train.next)
 	train.Advantage=train.Reward
-	train.Advantage=train.Advantage+Chrom_Model.output:max(2)+torch.log(torch.exp(C-(Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2)):expand(Chrom_Model.output:size())):sum(2))
+	train.end_loss=(((torch.abs(train.next-1)):sum(2)):sum(3)*math.log(single_loci_loss)):resize(train.Advantage:size());
+	train.Advantage=train.Advantage+Chrom_Model.output:max(2)+torch.log(torch.exp(train.end_loss-Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2)):expand(Chrom_Model.output:size())):sum(2))
 	Chrom_Model:forward(train.state)	
-
+	
 	CNV_Model:forward({train.state,train.chrom_state})
 	End_Point_Model:forward({train.chrom_state,train.chrom_state_new})
 	for i = 1,train.state:size(1) do

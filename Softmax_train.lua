@@ -33,9 +33,9 @@ opt.State_Chrom = {
 
 opt.State_CNV=deepcopy(opt.State_Chrom)
 
-opt.State_CNV.learningRate=2e-6
+--opt.State_CNV.learningRate=2e-6
 opt.State_End=deepcopy(opt.State_CNV)
-opt.State_End.learningRate=1e-6
+--opt.State_End.learningRate=2e-6
 --opt.State_Val.learningRate=0.001
 
 opt.Method = optim.adam;
@@ -76,8 +76,8 @@ feval_Chrom=function(x)
 
     local grad=torch.zeros(Chrom_Model.output:size())
     for i= 1,grad:size(1) do
-        local temp=Chrom_Model.output[i]:max()+torch.log(torch.exp(-(Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output[i]-Chrom_Model.output[i]:max()):sum())
-        for j =1,24 do
+        local temp=Chrom_Model.output[i]:max()+torch.log(torch.exp(train.end_loss[i]-Chrom_Model.output[i]:max())+torch.exp(Chrom_Model.output[i]-Chrom_Model.output[i]:max()):sum())
+        for j =1,23 do
                 grad[i][j]=grad[i][j]+train.Advantage[i]*torch.exp(Chrom_Model.output[i][j]-temp)/train.Advantage:size(1)
         end
     end
