@@ -43,8 +43,21 @@ Advantage_cal=function()
 		train.Advantage[i]=train.Advantage[i]-(Chrom_Model.output[i][train.ChrA[i]])
 		if train.ChrA[i]>1 then
 			train.Advantage[i]=train.Advantage[i]-torch.log(CNV_Model.output[i][train.CNV[i]])
+			temp_sum=0
+			for j=1,train.start_loci[i]:size(1) do
+				temp_sum=temp_sum+(CNV_Model.output[i][2*train.start_loci[i][j][1]+train.start_loci[i][j][2]*4-4])
+				temp_sum=temp_sum+(CNV_Model.output[i][2*train.start_loci[i][j][1]+train.start_loci[i][j][2]*4-5])
+			end
+
+			train.Advantage[i]=train.Advantage[i]+torch.log(temp_sum)
+
 			train.Advantage[i]=train.Advantage[i]-torch.log(End_Point_Model.output[i][train.End[i]])
-			train.Advantage[i]=train.Advantage[i]+torch.log(torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}]))
+		--	train.Advantage[i]=train.Advantage[i]+torch.log(torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}]))
+			temp_sum=0
+			for j=1,train.end_loci[i]:size(1) do
+                        	temp_sum=temp_sum+End_Point_Model.output[i][train.end_loci[i][j][1]]
+			end
+			train.Advantage[i]=train.Advantage[i]+torch.log(temp_sum)
 		end
 	end
 	return train.Advantage;

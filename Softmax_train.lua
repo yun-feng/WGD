@@ -33,7 +33,7 @@ opt.State_Chrom = {
 
 opt.State_CNV=deepcopy(opt.State_Chrom)
 
---opt.State_CNV.learningRate=2e-6
+--opt.State_CNV.learningRate=5e-5
 opt.State_End=deepcopy(opt.State_CNV)
 --opt.State_End.learningRate=2e-6
 --opt.State_Val.learningRate=0.001
@@ -110,6 +110,18 @@ feval_CNV=function(x)
 	for i= 1,grad:size(1) do
         if train.ChrA[i]>1 then
 		grad[i][train.CNV[i]]=-train.Advantage[i]/(CNV_Model.output[i][train.CNV[i]]*train.Advantage:size(1))
+		
+		local temp=0
+                for j=1,train.start_loci[i]:size(1) do
+                        temp=temp+CNV_Model.output[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-4]
+			temp=temp+CNV_Model.output[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-5]
+                end
+                for j=1,train.start_loci[i]:size(1) do
+                    grad[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-4]=grad[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-4]+train.Advantage[i]/(temp*train.Advantage:size(1))
+		    grad[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-5]=grad[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-5]+train.Advantage[i]/(temp*train.Advantage:size(1))
+
+                end
+
 	end
     end
     CNV_Model:backward({train.state,train.chrom_state},grad);
@@ -139,10 +151,19 @@ feval_End=function(x)
 	for i= 1,grad:size(1) do
         	if train.ChrA[i]>1 then
         	    grad[i][train.End[i]]=-train.Advantage[i]/(End_Point_Model.output[i][train.End[i]]*train.Advantage:size(1))
-        	    local temp=torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}])
-        	    for j=train.StartL[i],chrom_width do
-        	        grad[i][j]=grad[i][j]+train.Advantage[i]/(temp*train.Advantage:size(1))
-		   end
+        	    --local temp=torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}])
+        	local temp=0
+		for j=1,train.end_loci[i]:size(1) do
+                        temp=temp+End_Point_Model.output[i][train.end_loci[i][j][1]]
+                end
+		for j=1,train.end_loci[i]:size(1) do
+                    grad[i][train.end_loci[i][j][1]]=grad[i][train.end_loci[i][j][1]]+train.Advantage[i]/(temp*train.Advantage:size(1))
+                end
+
+		--for j=train.StartL[i],chrom_width do
+		
+        	--        grad[i][j]=grad[i][j]+train.Advantage[i]/(temp*train.Advantage:size(1))
+		--   end
 		end
     end
 	
