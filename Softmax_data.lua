@@ -36,6 +36,11 @@ LoadData=function(flag)
 	if not flag then
 		for i=1,train.state:size(1) do
 				train.state[i]=train.next[i];
+
+				--force WGD
+				if(torch.rand(1)[1]>0.9) then
+					train.state[i]=(train.state[i]/2):floor()*2
+				end
 		end
 	end
 	
@@ -45,11 +50,19 @@ LoadData=function(flag)
 	--sample chromosome
 	--Extract the cnp for the chromosome
 	
-	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22+1))+1;
+	--train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22+1))+1;
+	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22))+2;
 	train.chrom_state=torch.Tensor(train.state:size(1),nfeats,chrom_width,1);
 	for i=1,train.ChrA:size(1) do
-	--	if(torch.rand(1)[1]>0.9) then
-	--		train.ChrA[i]=1
+		--if(torch.rand(1)[1]>0.9) then
+		--	train.ChrA[i]=1
+		--end
+		
+		if((torch.floor(train.state[i]/2)*2-train.state[i]):abs():sum()<1) then
+			if torch.rand(1)[1]>0.5 then
+				train.ChrA[i]=1
+			end
+		end
 		train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i])
 	end
 	
@@ -113,6 +126,9 @@ LoadData=function(flag)
 	--Compute Reward-to-go and Advantage
 	train.next=train.state:clone();
 	train.Reward=torch.Tensor(train.state:size(1));
+
+	--force WGD
+	train.WGD_flag=torch.zeros(train.state:size(1))
 	local startL,endL;
 	for i=1,train.Reward:size(1) do
 		if train.ChrA[i]==1 then
@@ -127,7 +143,13 @@ LoadData=function(flag)
 			end
 		end
 		train.Reward[i]=Reward(train.ChrA[i],startL,endL,train.state[i],train.next[i])
-	end	
+	
+		if((torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
+			train.WGD_flag[i]=1
+		end
+	end
+	
+		
 	train.Advantage=torch.Tensor(train.state:size(1));
 	Advantage_cal();
 end
