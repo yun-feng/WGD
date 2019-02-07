@@ -2,7 +2,7 @@ require "torch"
 require "nn"
 require "math"
 
-normal_const=5e-3;
+normal_const=5e-5;
 single_loci_loss=normal_const*(1-2e-1);
 Half_Chromosome_CNV=normal_const*(1-0.4);
 Whole_Chromosome_CNV=normal_const*(1-0.5);

@@ -23,7 +23,7 @@ function deepcopy(orig)
 end
 
 opt.State_Chrom = {
-   learningRate=5e-6,
+   learningRate=1e-3,
    learningRateDecay=1e-7,
    weightDecay=1e-8,
    beta1=0.9,
