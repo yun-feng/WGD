@@ -5,10 +5,10 @@ require "math"
 cnp_file=("/data/ted/WGD/Simulation_cnp.txt")
 
 chrom_extract=function(cnp,chrom)
-	if chrom<=2 then
+	if chrom<=1 then
 		return torch.zeros(nfeats,chrom_width,1);
 	else
-		return cnp[{{},{chrom_width*(chrom-3)+1,chrom_width*(chrom-2)},{}}];
+		return cnp[{{},{chrom_width*(chrom-2)+1,chrom_width*(chrom-1)},{}}];
 	end
 end
 
@@ -136,7 +136,7 @@ LoadData=function(flag)
 		elseif train.ChrA[i]>1 then
 			startL=chrom_width*(train.ChrA[i]-2)+train.StartL[i];
 			endL=chrom_width*(train.ChrA[i]-2)+train.End[i];
-			cnv_a=train.CNV[i]%CNV_action:size(1)+1;	
+			cnv_a=(train.CNV[i]-1)%CNV_action:size(1)+1;	
 			for j=startL,endL do
 				train.next[i][1][j][1]=math.max(0,train.next[i][1][j][1]+CNV_action[cnv_a][1]);
 				train.next[i][2][j][1]=math.max(0,train.next[i][2][j][1]+CNV_action[cnv_a][2]);

@@ -20,26 +20,26 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 		--if torch.abs(EndL-StartL+1-chrom_width/2)<2 then
 		--	reward=math.log(Half_Chromosome_CNV);
 		--else 
-			if torch.abs(EndL-StartL+1-chrom_width)<3 then
+			if torch.abs(EndL-StartL+1-chrom_width)<1 then
 				reward=math.log(Whole_Chromosome_CNV);
 			end
 		--end
 	end
-	--reward=reward+torch.sum(torch.abs(EndS-1))*math.log(single_loci_loss);
-	--reward=reward-torch.sum(torch.abs(StartS-1))*math.log(single_loci_loss);
+	reward=reward+torch.sum(torch.abs(EndS-1))*math.log(single_loci_loss);
+	reward=reward-torch.sum(torch.abs(StartS-1))*math.log(single_loci_loss);
 	return reward;
 end
 
 Advantage_cal=function()
 	Chrom_Model:forward(train.next)
 	train.Advantage=train.Reward
-	train.end_loss=(((torch.abs(train.next-1)):sum(2)):sum(3)*math.log(single_loci_loss)):resize(train.Advantage:size());
+	--train.end_loss=(((torch.abs(train.next-1)):sum(2)):sum(3)*math.log(single_loci_loss)):resize(train.Advantage:size());
 	--train.Advantage=train.Advantage+Chrom_Model.output:max(2)
 	--train.Advantage=train.Advantage+torch.log(torch.exp(train.end_loss-Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2)):expand(Chrom_Model.output:size())):sum(2))
 	--force WGD
 	Chrom_Model.output:select(2,1):add(torch.log(train.WGD_flag))
 	train.Advantage=train.Advantage+Chrom_Model.output:max(2)
-	train.Advantage=train.Advantage+torch.log(torch.exp(train.end_loss-Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2)):expand(Chrom_Model.output:size())):sum(2))
+	train.Advantage=train.Advantage+torch.log(torch.exp(0-Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2)):expand(Chrom_Model.output:size())):sum(2))
 	
 	Chrom_Model:forward(train.state)	
 	
@@ -48,20 +48,20 @@ Advantage_cal=function()
 	for i = 1,train.state:size(1) do
 		train.Advantage[i]=train.Advantage[i]-(Chrom_Model.output[i][train.ChrA[i]])
 		if train.ChrA[i]>1 then
-			train.Advantage[i]=train.Advantage[i]-torch.log(CNV_Model.output[i][train.CNV[i]])
+			train.Advantage[i]=train.Advantage[i]-(CNV_Model.output[i][train.CNV[i]])
 			temp_sum=0
 			for j=1,train.start_loci[i]:size(1) do
-				temp_sum=temp_sum+(CNV_Model.output[i][2*train.start_loci[i][j][1]+train.start_loci[i][j][2]*4-4])
-				temp_sum=temp_sum+(CNV_Model.output[i][2*train.start_loci[i][j][1]+train.start_loci[i][j][2]*4-5])
+				temp_sum=temp_sum+torch.exp(CNV_Model.output[i][2*train.start_loci[i][j][1]+train.start_loci[i][j][2]*4-4])
+				temp_sum=temp_sum+torch.exp(CNV_Model.output[i][2*train.start_loci[i][j][1]+train.start_loci[i][j][2]*4-5])
 			end
 
 			train.Advantage[i]=train.Advantage[i]+torch.log(temp_sum)
 
-			train.Advantage[i]=train.Advantage[i]-torch.log(End_Point_Model.output[i][train.End[i]])
+			train.Advantage[i]=train.Advantage[i]-(End_Point_Model.output[i][train.End[i]])
 		--	train.Advantage[i]=train.Advantage[i]+torch.log(torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}]))
 			temp_sum=0
 			for j=1,train.end_loci[i]:size(1) do
-                        	temp_sum=temp_sum+End_Point_Model.output[i][train.end_loci[i][j][1]]
+                        	temp_sum=temp_sum+torch.exp(End_Point_Model.output[i][train.end_loci[i][j][1]])
 			end
 			train.Advantage[i]=train.Advantage[i]+torch.log(temp_sum)
 		end

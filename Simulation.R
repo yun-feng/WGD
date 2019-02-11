@@ -5,8 +5,8 @@ nsample=500;
 
 wkdata<-matrix(rep(1,2*nsample*22*50),ncol=50*22,nrow=nsample*2)
 
-change_p=c(1,1,-1,0,0,0,1,0,0)
-change_m=c(0,0,0,-1,-1,1,-1,0,0)
+change_p=c(1,1,-1,0,0,0,0,0,0)
+change_m=c(0,0,0,-1,-1,1,0,0,0)
 
 nstep1=10
 nstep2=10
