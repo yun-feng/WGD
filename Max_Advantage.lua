@@ -66,10 +66,10 @@ Advantage_cal=function()
 				if(wgd_loss > train.max_next[i]) then
 					train.max_next[i]=wgd_loss
 					train.wgd_times[i]=wgd_time
-					while(wgd_time>0) do
-						train.next=torch.floor(train.next/2)
-						wgd_time=wgd_time-1
-					end
+				--	while(wgd_time>0) do
+				--		train.next=torch.floor(train.next/2)
+				--		wgd_time=wgd_time-1
+				--	end
 				end
 			end
 	end
@@ -81,6 +81,8 @@ Advantage_cal=function()
 	CNV_Model:forward({train.state,train.chrom_state})
 	End_Point_Model:forward({train.chrom_state,train.chrom_state_new})
 	for i = 1,train.state:size(1) do
+
+if train.valid[i]>0 then
 		train.Advantage[i]=train.Advantage[i]+(Chrom_Model.output[i][train.ChrA[i]])
 		--if train.ChrA[i]>1 then
 			train.Advantage[i]=train.Advantage[i]-(CNV_Model.output[i][train.CNV[i]])
@@ -100,6 +102,7 @@ Advantage_cal=function()
                         	temp_max=math.max(temp_max,(End_Point_Model.output[i][train.end_loci[i][j][1]]))
 			end
 			train.Advantage[i]=train.Advantage[i]+temp_max
+end
 	end
 	return train.Advantage;
 end

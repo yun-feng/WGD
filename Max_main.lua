@@ -10,7 +10,7 @@ dofile (wkdir.."Policy.lua");
 
 dofile (wkdir.."Advantage.lua");
 dofile (wkdir.."train.lua");
-dofile (wkdir.."data.lua");
+dofile (wkdir.."data_simu.lua");
 
 cycle=100000000
 counter=0;
@@ -36,4 +36,6 @@ for c=0,cycle do
     torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);
     torch.save(wkdir.."Model_CNV_Model",CNV_Model);
 	torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
+	
+
 end

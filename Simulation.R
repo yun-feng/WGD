@@ -5,22 +5,25 @@ nsample=500;
 
 wkdata<-matrix(rep(1,2*nsample*22*50),ncol=50*22,nrow=nsample*2)
 
-change_p=c(1,1,-1,0,0,0,0,0,0)
-change_m=c(0,0,0,-1,-1,1,0,0,0)
+change_p=c(1,1,-1,0,0,0,0,0,0,0,0,0,0,0)
+change_m=c(0,0,0,-1,-1,1,0,0,0,0,0,0,0,0)
 
-nstep1=10
-nstep2=10
+nstep1=5
+nstep2=5
 #before
 for(j in 1:nstep1){
   for( i in 1:nsample){
-    start=floor(runif(1,1,22*50+1))
-    end=floor(runif(1,1,22*50+1))
+    start=floor(runif(1,1,50+1))
+    end=floor(runif(1,1,50+1))
+    chrom=floor(runif(1,0,22))
     if(start>end){
       temp=end
       end=start
       start=temp
     }
-    type=floor(runif(1,1,10))
+    start=chrom*50+start
+    end=chrom*50+end
+    type=floor(runif(1,1,15))
     wkdata[i*2-1,start:end]=wkdata[i*2-1,start:end]+change_m[type]
     wkdata[i*2,start:end]=wkdata[i*2,start:end]+change_p[type]
   }
@@ -36,14 +39,17 @@ for( i in 1:nsample){
 #after
 for(j in 1:nstep2){
   for( i in 1:nsample){
-    start=floor(runif(1,1,22*50+1))
-    end=floor(runif(1,1,22*50+1))
+	start=floor(runif(1,1,50+1))
+    end=floor(runif(1,1,50+1))
+    chrom=floor(runif(1,0,22))
     if(start>end){
       temp=end
       end=start
       start=temp
     }
-    type=floor(runif(1,1,10))
+    start=chrom*50+start
+    end=chrom*50+end
+    type=floor(runif(1,1,15))
     wkdata[i*2-1,start:end]=wkdata[i*2-1,start:end]+change_m[type]
     wkdata[i*2,start:end]=wkdata[i*2,start:end]+change_p[type]
   }
