@@ -23,7 +23,7 @@ function deepcopy(orig)
 end
 
 opt.State_Chrom = {
-   learningRate=1e-3,
+   learningRate=1e-4,
    learningRateDecay=1e-7,
    weightDecay=1e-8,
    beta1=0.9,
@@ -108,24 +108,25 @@ feval_CNV=function(x)
     local f=train.Advantage;
 	local grad=torch.zeros(CNV_Model.output:size())
 	for i= 1,grad:size(1) do
-        if train.ChrA[i]>1 then
+        --if train.ChrA[i]>1 then
 		grad[i][train.CNV[i]]=-train.Advantage[i]/(train.Advantage:size(1))
 		
 		local temp=CNV_Model.output[i][train.start_loci[i][1][1]*2+train.start_loci[i][1][2]*4-4]
 		local temp_l=train.start_loci[i][1][1]*2+train.start_loci[i][1][2]*4-4
                 for j=1,train.start_loci[i]:size(1) do
+			
                         if((CNV_Model.output[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-4]) > temp) then
 				temp_l=train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-4
-				temp=(CNV_Model.output[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-4])
+				temp=(CNV_Model.output[i][temp_l])
 			elseif ((CNV_Model.output[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-5]) > temp) then
                                 temp_l=train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-5
-                                temp=(CNV_Model.output[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-5])
+                                temp=(CNV_Model.output[i][temp_l])
 			end
 			grad[i][temp_l]=grad[i][temp_l]+train.Advantage[i]/(train.Advantage:size(1))
 			
                 end
 
-	end
+	--end
     end
     CNV_Model:backward({train.state,train.chrom_state},grad);
     return f,parGrad_CNV;
@@ -152,7 +153,7 @@ feval_End=function(x)
     
 	local grad=torch.zeros(End_Point_Model.output:size())
 	for i= 1,grad:size(1) do
-        	if train.ChrA[i]>1 then
+        	--if train.ChrA[i]>1 then
         	    grad[i][train.End[i]]=-train.Advantage[i]/(train.Advantage:size(1))
         	    --local temp=torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}])
         	local temp=End_Point_Model.output[i][train.end_loci[i][1][1]]
@@ -160,7 +161,7 @@ feval_End=function(x)
 		for j=1,train.end_loci[i]:size(1) do
 			if( temp<End_Point_Model.output[i][train.end_loci[i][j][1]]) then
 				temp_l=train.end_loci[i][j][1]
-				temp=End_Point_Model.output[i][train.end_loci[i][j][1]]
+				temp=End_Point_Model.output[i][temp_l]
                 	end
 		end
                     grad[i][temp_l]=grad[i][temp_l]+train.Advantage[i]/(train.Advantage:size(1))
@@ -170,7 +171,7 @@ feval_End=function(x)
 		
         	--        grad[i][j]=grad[i][j]+train.Advantage[i]/(temp*train.Advantage:size(1))
 		--   end
-		end
+		--end
     end
 	
     End_Point_Model:backward({train.chrom_state,train.chrom_state_new},grad);
@@ -179,7 +180,7 @@ feval_End=function(x)
 end
 
 function model_train()
---	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
+	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
 	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
 	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 	

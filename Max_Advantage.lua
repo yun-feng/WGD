@@ -49,7 +49,7 @@ end
 
 Advantage_cal=function()
 	Chrom_Model:forward(train.next)
-	train.Advantage=train.Reward
+	train.Advantage=train.Reward:clone()
 	--train.end_loss=(((torch.abs(train.next-1)):sum(2)):sum(3)*math.log(single_loci_loss)):resize(train.Advantage:size());
 	--train.Advantage=train.Advantage+Chrom_Model.output:max(2)
 	--train.Advantage=train.Advantage+torch.log(torch.exp(train.end_loss-Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2)):expand(Chrom_Model.output:size())):sum(2))
