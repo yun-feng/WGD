@@ -112,15 +112,15 @@ if train.valid[i]>0 then
         --if train.ChrA[i]>1 then
 		grad[i][train.CNV[i]]=-train.Advantage[i]/(train.Advantage:size(1))
 		
-		local temp=CNV_Model.output[i][train.start_loci[i][1][1]*2+train.start_loci[i][1][2]*4-4]
-		local temp_l=train.start_loci[i][1][1]*2+train.start_loci[i][1][2]*4-4
+		local temp=CNV_Model.output[i][train.start_loci[i][1][2]*2-1]
+		local temp_l=train.start_loci[i][1][2]*2-1
                 for j=1,train.start_loci[i]:size(1) do
 			
-                        if((CNV_Model.output[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-4]) > temp) then
-				temp_l=train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-4
+                        if((CNV_Model.output[i][train.start_loci[i][j][2]*2-1]) > temp) then
+				temp_l=train.start_loci[i][j][2]*2-1
 				temp=(CNV_Model.output[i][temp_l])
-			elseif ((CNV_Model.output[i][train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-5]) > temp) then
-                                temp_l=train.start_loci[i][j][1]*2+train.start_loci[i][j][2]*4-5
+			elseif ((CNV_Model.output[i][train.start_loci[i][j][2]*2]) > temp) then
+                                temp_l=train.start_loci[i][j][2]*2
                                 temp=(CNV_Model.output[i][temp_l])
 			end
 			grad[i][temp_l]=grad[i][temp_l]+train.Advantage[i]/(train.Advantage:size(1))

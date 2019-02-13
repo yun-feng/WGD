@@ -1,0 +1,106 @@
+require "torch"
+
+require "math"
+
+
+chrom_extract=function(cnp,chrom,allele)
+	--if chrom<=1 then
+	--	return torch.zeros(1,chrom_width,1);
+	--else
+		return cnp[{{allele,allele},{chrom_width*(chrom-1-allele*22+22)+1,chrom_width*(chrom-allele*22+22)},{}}];
+--	end
+end
+
+CNV_action=torch.Tensor({{1,0},{-1,0},{0,1},{0,-1}})
+
+LoadData=function(flag)
+	--when flag is true, load data from file
+	--otherwise use the next state as input
+	if flag then
+		train.state=torch.ones(25,2,1100,1)
+        	train.next=torch.ones(25,2,1100,1)
+	end
+
+	if not flag then
+		train.next=train.state:clone()
+	end
+	
+	
+	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1;
+	train.StartL=torch.floor(torch.rand(train.state:size(1))*chrom_width)+1
+	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
+	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
+	train.allele=torch.floor((train.ChrA-1)/22)+1
+	train.cnv=(torch.floor(torch.rand(train.state:size(1))*2))
+	train.CNV=train.StartL*2+train.cnv-1
+	train.cnv=(train.cnv-0.5)*2
+	train.valid=torch.ones(train.state:size(1))
+	train.start_loci={}
+	train.end_loci={}
+	
+	train.chrom_state=torch.Tensor(train.state:size(1),1,chrom_width,1);
+	train.chrom_state_new=torch.Tensor(train.state:size(1),1,chrom_width,1);
+		
+
+	for i=1,train.ChrA:size(1) do
+		if (torch.rand(1)[1]>0.9 and train.state:sum()<2200*4) then
+			train.state=train.state*2
+		end
+		train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i],train.allele[i])
+                train.chrom_state_new[i]=train.chrom_state[i]:clone()
+
+		for j=train.StartL[i],chrom_width do
+			train.chrom_state_new[i][1][j][1]=train.chrom_state_new[i][1][j][1]-train.cnv[i]
+			if j<=train.End[i] then
+				train.chrom_state[i][1][j][1]=train.chrom_state[i][1][j][1]-train.cnv[i]
+				train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+j-train.allele[i]*22*chrom_width+22*chrom_width][1]=train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+j-train.allele[i]*22*chrom_width+22*chrom_width][1]-train.cnv[i]
+				if(train.chrom_state[i][1][j][1]<0) then
+					train.valid[i]=0
+				end
+			end
+
+		end
+		if(train.StartL[i]>1 and torch.abs(train.chrom_state[i][1][train.StartL[i]][1]-train.chrom_state[i][1][train.StartL[i]-1][1])<0.01) then
+                        train.valid[i]=0
+                end
+                if(train.End[i]<50 and torch.abs(train.chrom_state[i][1][train.End[i]][1]-train.chrom_state[i][1][train.End[i]+1][1])<0.01) then
+                        train.valid[i]=0
+                end
+	
+		temp_start=torch.zeros(1,chrom_width,1)-1
+                temp_copy=train.chrom_state[i]
+                temp_start[{{},{2,50},}]:copy(temp_copy[{{},{1,49},}])
+                temp_start_loci=(temp_copy-temp_start):select(3,1):nonzero()
+                table.insert(train.start_loci,temp_start_loci)
+
+		temp_end=torch.zeros(chrom_width,1)-1
+                temp_copy=train.chrom_state[i][1]
+                temp_end[{{1,49},}]:copy(temp_copy[{{2,50},}])
+                if train.StartL[i]>1 then
+                        temp_end[{{1,train.StartL[i]-1},}]:copy(temp_copy[{{1,train.StartL[i]-1},}])
+                end
+                temp_end_loci=(temp_copy-temp_end):select(2,1):nonzero()
+                table.insert(train.end_loci,temp_end_loci)
+		
+	end
+	
+	--Compute CNP at the next time point
+	--Compute Reward-to-go and Advantage
+	train.Reward=torch.Tensor(train.state:size(1));
+
+	--force WGD
+	train.WGD_flag=torch.zeros(train.state:size(1))
+	local startL,endL;
+	for i=1,train.Reward:size(1) do
+		train.Reward[i]=Reward(train.ChrA[i],train.StartL[i],train.End[i],train.state[i],train.next[i])
+	
+		if((torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
+			train.WGD_flag[i]=1
+		end
+	end
+	
+		
+	train.Advantage=torch.Tensor(train.state:size(1));
+	Advantage_cal();
+	train.Advantage=torch.cmul(train.Advantage,train.valid)
+end

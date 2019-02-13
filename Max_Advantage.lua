@@ -86,10 +86,10 @@ if train.valid[i]>0 then
 		train.Advantage[i]=train.Advantage[i]+(Chrom_Model.output[i][train.ChrA[i]])
 		--if train.ChrA[i]>1 then
 			train.Advantage[i]=train.Advantage[i]-(CNV_Model.output[i][train.CNV[i]])
-			temp_max=CNV_Model.output[i][2*train.start_loci[i][1][1]+train.start_loci[i][1][2]*4-4]
+			temp_max=CNV_Model.output[i][train.start_loci[i][1][2]*2-1]
 			for j=1,train.start_loci[i]:size(1) do
-				temp_max=math.max(temp_max,CNV_Model.output[i][2*train.start_loci[i][j][1]+train.start_loci[i][j][2]*4-4])
-				 temp_max=math.max(temp_max,CNV_Model.output[i][2*train.start_loci[i][j][1]+train.start_loci[i][j][2]*4-5])
+				temp_max=math.max(temp_max,CNV_Model.output[i][train.start_loci[i][j][2]*2-1])
+				 temp_max=math.max(temp_max,CNV_Model.output[i][train.start_loci[i][j][2]*2])
 
 			end
 
