@@ -112,11 +112,11 @@ if train.valid[i]>0 then
         --if train.ChrA[i]>1 then
 		grad[i][train.CNV[i]]=-train.Advantage[i]/(train.Advantage:size(1))
 		
-		local temp=CNV_Model.output[i][train.start_loci[i][1][2]*2-1]
-		local temp_l=train.start_loci[i][1][2]*2-1
+		local temp=CNV_Model.output[i][train.start_loci[i][1][2]*2]
+		local temp_l=train.start_loci[i][1][2]*2
                 for j=1,train.start_loci[i]:size(1) do
 			
-                        if((CNV_Model.output[i][train.start_loci[i][j][2]*2-1]) > temp) then
+                        if( (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>0) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1]) > temp) then
 				temp_l=train.start_loci[i][j][2]*2-1
 				temp=(CNV_Model.output[i][temp_l])
 			elseif ((CNV_Model.output[i][train.start_loci[i][j][2]*2]) > temp) then
@@ -161,7 +161,7 @@ if train.valid[i]>0 then
         	local temp=End_Point_Model.output[i][train.end_loci[i][1][1]]
 		local temp_l=train.end_loci[i][1][1]
 		for j=1,train.end_loci[i]:size(1) do
-			if( temp<End_Point_Model.output[i][train.end_loci[i][j][1]]) then
+			if( (train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>0) and temp<End_Point_Model.output[i][train.end_loci[i][j][1]]) then
 				temp_l=train.end_loci[i][j][1]
 				temp=End_Point_Model.output[i][temp_l]
                 	end
