@@ -49,7 +49,7 @@ end
 
 Advantage_cal=function()
 	Chrom_Model:forward(train.next)
-	train.Advantage=train.Reward:clone()
+	train.Advantage=train.Advantage+train.Reward:clone()
 	--train.end_loss=(((torch.abs(train.next-1)):sum(2)):sum(3)*math.log(single_loci_loss)):resize(train.Advantage:size());
 	--train.Advantage=train.Advantage+Chrom_Model.output:max(2)
 	--train.Advantage=train.Advantage+torch.log(torch.exp(train.end_loss-Chrom_Model.output:max(2))+torch.exp(Chrom_Model.output-(Chrom_Model.output:max(2)):expand(Chrom_Model.output:size())):sum(2))
@@ -66,15 +66,15 @@ Advantage_cal=function()
 				if(wgd_loss > train.max_next[i]) then
 					train.max_next[i]=wgd_loss
 					train.wgd_times[i]=wgd_time
-				--	while(wgd_time>0) do
-				--		train.next=torch.floor(train.next/2)
-				--		wgd_time=wgd_time-1
-				--	end
+					while(wgd_time>0) do
+						train.next=torch.floor(train.next/2)
+						wgd_time=wgd_time-1
+					end
 				end
 			end
 	end
 				
-	train.Advantage=train.Advantage+train.max_next;
+	train.Advantage=train.Advantage+torch.cmul(train.max_next,train.valid);
 	
 	Chrom_Model:forward(train.state)	
 	

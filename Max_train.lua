@@ -64,26 +64,28 @@ feval_Chrom=function(x)
     
 	local grad=torch.zeros(Chrom_Model.output:size())
 	for i= 1,grad:size(1) do
+if train.valid[i]>0 then
 		grad[i][train.ChrA[i]]=train.Advantage[i]/(train.Advantage:size(1))
+end
 	end
 	
     Chrom_Model:backward(train.state,grad);
 
-   -- local par_cp=parGrad_Chrom:clone();
+--    local par_cp=parGrad_Chrom:clone();
     
-   -- Chrom_Model:zeroGradParameters();
-   -- Chrom_Model:forward(train.next)
-   -- Chrom_Model.output:select(2,1):add(torch.log(train.WGD_flag))
-   -- local grad=torch.zeros(Chrom_Model.output:size())
-   -- for i= 1,grad:size(1) do
-   --     local temp,temp_l=Chrom_Model.output[i]:min(1)--+torch.log(torch.exp(0-Chrom_Model.output[i]:max())+torch.exp(Chrom_Model.output[i]-Chrom_Model.output[i]:max()):sum())
-   --           	if( -temp[1] > train.max_next[i]-train.wgd_times[i]*math.log(WGD)-1e-5 ) then
-	--		grad[i][temp_l[1]]=grad[i][temp_l[1]]-train.Advantage[i]/train.Advantage:size(1)
-	--	end
+--    Chrom_Model:zeroGradParameters();
+--    Chrom_Model:forward(train.next)
+    --Chrom_Model.output:select(2,1):add(torch.log(train.WGD_flag))
+--    local grad=torch.zeros(Chrom_Model.output:size())
+--    for i= 1,grad:size(1) do
+--        local temp,temp_l=Chrom_Model.output[i]:min(1)--+torch.log(torch.exp(0-Chrom_Model.output[i]:max())+torch.exp(Chrom_Model.output[i]-Chrom_Model.output[i]:max()):sum())
+--              	if( -temp[1] > train.max_next[i]-train.wgd_times[i]*math.log(WGD)-1e-5 ) then
+--			grad[i][temp_l[1]]=grad[i][temp_l[1]]-train.Advantage[i]/train.Advantage:size(1)
+--		end
 --    end
 
-  --  Chrom_Model:backward(train.next,grad);
-   -- parGrad_Chrom:add(par_cp);
+--    Chrom_Model:backward(train.next,grad);
+--    parGrad_Chrom:add(par_cp);
 
     return f,parGrad_Chrom;
 end
