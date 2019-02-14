@@ -2,7 +2,7 @@ require "torch"
 require "nn"
 require "math"
 
-normal_const=5e-5;
+normal_const=1--5e-5;
 single_loci_loss=normal_const*(1-2e-1);
 Half_Chromosome_CNV=normal_const*(1-0.4);
 Whole_Chromosome_CNV=normal_const*(1-0.5);
@@ -85,7 +85,7 @@ Advantage_cal=function()
 if train.valid[i]>0 then
 		train.Advantage[i]=train.Advantage[i]+(Chrom_Model.output[i][train.ChrA[i]])
 		--if train.ChrA[i]>1 then
-			train.Advantage[i]=train.Advantage[i]-(CNV_Model.output[i][train.CNV[i]])
+			train.Advantage[i]=train.Advantage[i]-2*(CNV_Model.output[i][train.CNV[i]])
 			temp_max=CNV_Model.output[i][train.start_loci[i][1][2]*2]
 			for j=1,train.start_loci[i]:size(1) do
 				temp_max=math.max(temp_max,CNV_Model.output[i][train.start_loci[i][j][2]*2])
@@ -94,9 +94,9 @@ if train.valid[i]>0 then
 				end
 			end
 
-			train.Advantage[i]=train.Advantage[i]+temp_max
+			train.Advantage[i]=train.Advantage[i]+2*temp_max
 
-			train.Advantage[i]=train.Advantage[i]-(End_Point_Model.output[i][train.End[i]])
+			train.Advantage[i]=train.Advantage[i]-2*(End_Point_Model.output[i][train.End[i]])
 		--	train.Advantage[i]=train.Advantage[i]+torch.log(torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}]))
 			temp_max=End_Point_Model.output[i][train.end_loci[i][1][1]]
 			for j=1,train.end_loci[i]:size(1) do
@@ -104,7 +104,7 @@ if train.valid[i]>0 then
                         		temp_max=math.max(temp_max,(End_Point_Model.output[i][train.end_loci[i][j][1]]))
 				end
 			end
-			train.Advantage[i]=train.Advantage[i]+temp_max
+			train.Advantage[i]=train.Advantage[i]+2*temp_max
 end
 	end
 	return train.Advantage;

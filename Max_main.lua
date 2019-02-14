@@ -18,11 +18,11 @@ LoadData(true)
 
 for c=0,cycle do
 	counter=counter+1;
-	if torch.rand(1)[1]>0.99 then
-		flag=true;
-	else 
+--	if torch.rand(1)[1]>0.99 then
+--		flag=true;
+--	else 
 		flag=false;
-	end
+--	end
 		
 	print(string.format("Start cycle %d", c));
     print("Loading data");

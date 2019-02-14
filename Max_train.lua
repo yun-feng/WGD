@@ -41,8 +41,6 @@ opt.State_End=deepcopy(opt.State_CNV)
 opt.Method = optim.adam;
 
 
-
-
 par_Chrom,parGrad_Chrom=Chrom_Model:getParameters();
 
 feval_Chrom=function(x)
@@ -112,7 +110,11 @@ feval_CNV=function(x)
 	for i= 1,grad:size(1) do
 if train.valid[i]>0 then
         --if train.ChrA[i]>1 then
-		grad[i][train.CNV[i]]=-train.Advantage[i]/(train.Advantage:size(1))
+        temp_ad=train.Advantage[i]
+	if (torch.abs(train.Advantage[i])>=2) then
+--		train.Advantage[i]=0
+	end
+		grad[i][train.CNV[i]]=-2*train.Advantage[i]/(train.Advantage:size(1))
 		
 		local temp=CNV_Model.output[i][train.start_loci[i][1][2]*2]
 		local temp_l=train.start_loci[i][1][2]*2
@@ -125,9 +127,10 @@ if train.valid[i]>0 then
                                 temp_l=train.start_loci[i][j][2]*2
                                 temp=(CNV_Model.output[i][temp_l])
 			end
-			grad[i][temp_l]=grad[i][temp_l]+train.Advantage[i]/(train.Advantage:size(1))
+			grad[i][temp_l]=grad[i][temp_l]+2*train.Advantage[i]/(train.Advantage:size(1))
 			
                 end
+	train.Advantage[i]=temp_ad
 end
 	--end
     end
@@ -157,8 +160,12 @@ feval_End=function(x)
 	local grad=torch.zeros(End_Point_Model.output:size())
 	for i= 1,grad:size(1) do
 if train.valid[i]>0 then
+	temp_ad=train.Advantage[i]
+	if torch.abs(train.Advantage[i])>=2 then
+  --      	train.Advantage[i]=0
+	end
         	--if train.ChrA[i]>1 then
-        	    grad[i][train.End[i]]=-train.Advantage[i]/(train.Advantage:size(1))
+        	    grad[i][train.End[i]]=-2*train.Advantage[i]/(train.Advantage:size(1))
         	    --local temp=torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}])
         	local temp=End_Point_Model.output[i][train.end_loci[i][1][1]]
 		local temp_l=train.end_loci[i][1][1]
@@ -168,7 +175,7 @@ if train.valid[i]>0 then
 				temp=End_Point_Model.output[i][temp_l]
                 	end
 		end
-                    grad[i][temp_l]=grad[i][temp_l]+train.Advantage[i]/(train.Advantage:size(1))
+                    grad[i][temp_l]=grad[i][temp_l]+2*train.Advantage[i]/(train.Advantage:size(1))
                 
 
 		--for j=train.StartL[i],chrom_width do
@@ -177,6 +184,7 @@ if train.valid[i]>0 then
 		--   end
 		--end
 end
+	train.Advantage[i]=temp_ad
     end
 	
     End_Point_Model:backward({train.chrom_state,train.chrom_state_new},grad);
@@ -188,5 +196,4 @@ function model_train()
 	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
 	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
 	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
-	
 end
