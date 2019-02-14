@@ -110,27 +110,24 @@ feval_CNV=function(x)
 	for i= 1,grad:size(1) do
 if train.valid[i]>0 then
         --if train.ChrA[i]>1 then
-        temp_ad=train.Advantage[i]
-	if (torch.abs(train.Advantage[i])>=2) then
---		train.Advantage[i]=0
-	end
-		grad[i][train.CNV[i]]=-2*train.Advantage[i]/(train.Advantage:size(1))
-		
-		local temp=CNV_Model.output[i][train.start_loci[i][1][2]*2]
-		local temp_l=train.start_loci[i][1][2]*2
+        	if train.CNV[i]>1 then
+			grad[i][train.CNV[i]-1]=-2*train.Advantage[i]/(train.Advantage:size(1))
+		end
+		local temp=CNV_Model.output[i][train.start_loci[i][1][2]*2-1]
+		local temp_l=train.start_loci[i][1][2]*2-1
                 for j=1,train.start_loci[i]:size(1) do
 			
-                        if( (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>0) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1]) > temp) then
-				temp_l=train.start_loci[i][j][2]*2-1
+                        if(train.start_loci[i][j][2]*2-1>1 and (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>0) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1]) > temp) then
+				temp_l=train.start_loci[i][j][2]*2-1-1
 				temp=(CNV_Model.output[i][temp_l])
-			elseif ((CNV_Model.output[i][train.start_loci[i][j][2]*2]) > temp) then
-                                temp_l=train.start_loci[i][j][2]*2
+			elseif ((CNV_Model.output[i][train.start_loci[i][j][2]*2-1]) > temp) then
+                                temp_l=train.start_loci[i][j][2]*2-1
                                 temp=(CNV_Model.output[i][temp_l])
 			end
-			grad[i][temp_l]=grad[i][temp_l]+2*train.Advantage[i]/(train.Advantage:size(1))
-			
+			if (temp>0 or train.chrom_state[i][1][1][1]-1<0) then
+				grad[i][temp_l]=grad[i][temp_l]+2*train.Advantage[i]/(train.Advantage:size(1))
+			end
                 end
-	train.Advantage[i]=temp_ad
 end
 	--end
     end
@@ -160,23 +157,27 @@ feval_End=function(x)
 	local grad=torch.zeros(End_Point_Model.output:size())
 	for i= 1,grad:size(1) do
 if train.valid[i]>0 then
-	temp_ad=train.Advantage[i]
-	if torch.abs(train.Advantage[i])>=2 then
-  --      	train.Advantage[i]=0
-	end
-        	--if train.ChrA[i]>1 then
-        	    grad[i][train.End[i]]=-2*train.Advantage[i]/(train.Advantage:size(1))
-        	    --local temp=torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}])
-        	local temp=End_Point_Model.output[i][train.end_loci[i][1][1]]
-		local temp_l=train.end_loci[i][1][1]
+        	if train.End[i]>1 then
+        	    grad[i][train.End[i]-1]=-2*train.Advantage[i]/(train.Advantage:size(1))
+        	end
+		    --local temp=torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}])
+		local temp,templ	
+		if train.end_loci[i][1][1]>1 then
+		         temp=End_Point_Model.output[i][train.end_loci[i][1][1]-1]
+			 temp_l=train.end_loci[i][1][1]-1
+		else
+			 temp=0
+			 temp_l=0
+		end
 		for j=1,train.end_loci[i]:size(1) do
-			if( (train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>0) and temp<End_Point_Model.output[i][train.end_loci[i][j][1]]) then
-				temp_l=train.end_loci[i][j][1]
+			if(train.end_loci[i][j][1]>1 and (train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>0) and temp<End_Point_Model.output[i][train.end_loci[i][j][1]-1]) then
+				temp_l=train.end_loci[i][j][1]-1
 				temp=End_Point_Model.output[i][temp_l]
                 	end
 		end
+		if temp_l>0 then
                     grad[i][temp_l]=grad[i][temp_l]+2*train.Advantage[i]/(train.Advantage:size(1))
-                
+                end
 
 		--for j=train.StartL[i],chrom_width do
 		
@@ -184,7 +185,6 @@ if train.valid[i]>0 then
 		--   end
 		--end
 end
-	train.Advantage[i]=temp_ad
     end
 	
     End_Point_Model:backward({train.chrom_state,train.chrom_state_new},grad);

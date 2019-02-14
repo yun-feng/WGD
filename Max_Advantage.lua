@@ -85,23 +85,38 @@ Advantage_cal=function()
 if train.valid[i]>0 then
 		train.Advantage[i]=train.Advantage[i]+(Chrom_Model.output[i][train.ChrA[i]])
 		--if train.ChrA[i]>1 then
-			train.Advantage[i]=train.Advantage[i]-2*(CNV_Model.output[i][train.CNV[i]])
-			temp_max=CNV_Model.output[i][train.start_loci[i][1][2]*2]
+			if train.CNV[i]>1 then
+				train.Advantage[i]=train.Advantage[i]-2*(CNV_Model.output[i][train.CNV[i]-1])
+			end
+			temp_max=CNV_Model.output[i][train.start_loci[i][1][2]*2-1]
 			for j=1,train.start_loci[i]:size(1) do
-				temp_max=math.max(temp_max,CNV_Model.output[i][train.start_loci[i][j][2]*2])
+				temp_max=math.max(temp_max,CNV_Model.output[i][train.start_loci[i][j][2]*2-1])
 				if (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>0) then
-				 	temp_max=math.max(temp_max,CNV_Model.output[i][train.start_loci[i][j][2]*2-1])
+					if  train.start_loci[i][j][2]*2-1>1 then
+				 		temp_max=math.max(temp_max,CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1])
+					else
+						temp_max=math.max(temp_max,0)
+					end
 				end
 			end
 
 			train.Advantage[i]=train.Advantage[i]+2*temp_max
-
-			train.Advantage[i]=train.Advantage[i]-2*(End_Point_Model.output[i][train.End[i]])
+			if train.End[i]>1 then
+				train.Advantage[i]=train.Advantage[i]-2*(End_Point_Model.output[i][train.End[i]-1])
+			end
 		--	train.Advantage[i]=train.Advantage[i]+torch.log(torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}]))
-			temp_max=End_Point_Model.output[i][train.end_loci[i][1][1]]
+			if train.end_loci[i][1][1]>1 then
+				temp_max=End_Point_Model.output[i][train.end_loci[i][1][1]-1]
+			else
+				temp_max=0
+			end
 			for j=1,train.end_loci[i]:size(1) do
 				if(train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>0) then
-                        		temp_max=math.max(temp_max,(End_Point_Model.output[i][train.end_loci[i][j][1]]))
+					if train.end_loci[i][j][1] >1 then
+                        			temp_max=math.max(temp_max,(End_Point_Model.output[i][train.end_loci[i][j][1]-1]))
+					else
+						temp_max=math.max(temp_max,0)
+					end
 				end
 			end
 			train.Advantage[i]=train.Advantage[i]+2*temp_max

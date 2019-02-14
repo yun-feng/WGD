@@ -66,7 +66,7 @@ CNV_Net =CNV_Net-nn.Threshold(0, 1e-6)
 
 nchannel = math.floor((math.floor((width)/20)+chrom_width)/4)
 CNV_Net =CNV_Net-nn.Reshape(nkernels[3]/2*nchannel)
-CNV_Net =CNV_Net-nn.Linear(nkernels[3]/2*nchannel,2*chrom_width)
+CNV_Net =CNV_Net-nn.Linear(nkernels[3]/2*nchannel,2*chrom_width-1)
 --CNV_Net =CNV_Net-nn.SoftMax();
 --CNV_Net=CNV_Net-nn.Sigmoid()
 
@@ -88,7 +88,7 @@ End_Point_Net =End_Point_Net-nn.SpatialConvolution(nkernels[2]/2, nkernels[3]/2,
 End_Point_Net =End_Point_Net-nn.Threshold(0, 1e-6)
 
 End_Point_Net =End_Point_Net-nn.Reshape(nkernels[3]/2*chrom_width)
-End_Point_Net =End_Point_Net-nn.Linear(nkernels[3]/2*chrom_width,chrom_width)
+End_Point_Net =End_Point_Net-nn.Linear(nkernels[3]/2*chrom_width,chrom_width-1)
 --End_Point_Net= End_Point_Net-nn.SoftMax()
 --End_Point_Net=End_Point_Net-nn.Sigmoid()
 End_Point_Model=nn.gModule({End_Point_i1,End_Point_i2},{End_Point_Net});
