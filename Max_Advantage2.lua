@@ -77,12 +77,12 @@ Advantage_cal=function()
 			temp_max=CNV_Model.output[i][train.start_loci[i][1][2]*2-1]
 			train.max_cnv[i]=train.start_loci[i][1][2]*2-1
 			for j=1,train.start_loci[i]:size(1) do
-				if(CNV_Model.output[i][train.start_loci[i][j][2]*2-1] > temp_max)
+				if(CNV_Model.output[i][train.start_loci[i][j][2]*2-1] > temp_max) then
 					temp_max=CNV_Model.output[i][train.start_loci[i][j][2]*2-1]
 					train.max_cnv[i]=train.start_loci[i][j][2]*2-1
 				end
 				if (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>0) then
-					if  (train.start_loci[i][j][2]*2-1>1) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]>temp_max then
+					if  (train.start_loci[i][j][2]*2-1>1) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]>temp_max) then
 							temp_max=CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]
 							train.max_cnv[i]=train.start_loci[i][j][2]*2-1-1
 					else
@@ -102,7 +102,7 @@ Advantage_cal=function()
 			for j=temp_start,chrom_width do
 				chrom_state_new2[1][j][1]=chrom_state_new2[1][j][1]+temp_action
 			end
-			End_Point_Model:forward(train.chrom_state[i],chrom_state_new2)
+			End_Point_Model:forward({train.chrom_state[i],chrom_state_new2})
 			
 			temp_end=torch.zeros(chrom_width,1)-1
 			temp_copy=train.chrom_state[i][1]
