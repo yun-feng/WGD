@@ -33,7 +33,7 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.95/(1+math.exp(-1000*counter))) then
+		if(torch.rand(1)[1]>0.95/(1+math.exp(-2e-4*counter))) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0

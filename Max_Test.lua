@@ -20,6 +20,8 @@ End_Point_Model=torch.load(wkdir.."Model_End_Point_Model");
 dofile (wkdir.."Advantage2.lua");
 dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
+counter=1
+
 
 train.next=torch.ones(1,2,22*50,1)
 flag=false
