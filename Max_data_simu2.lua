@@ -21,32 +21,34 @@ LoadData=function(flag)
         train.next=torch.ones(25,2,1100,1)
 		train.Advantage=torch.zeros(25)
 		train.step=torch.zeros(25)
+		train.valid=torch.ones(25)
 	end
 
 --	if not flag then
 --		train.next=train.state:clone()
 --	end
-	
-	
+		
 	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1;
 	train.StartL=torch.floor(torch.rand(train.state:size(1))*chrom_width)+1
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.95) then
+		if(torch.rand(1)[1]>0.95/(1+math.exp(-1000*counter))) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
 			train.step[i]=0
 		else
-			train.next[i]=train.state[i]:clone()
-			train.step[i]=train.step[i]+1
-			train.Advantage[i]=train.Advantage[i]*(1/train.step[i])
+			if(train.valid[i]>0) then
+				train.next[i]=train.state[i]:clone()
+				train.step[i]=train.step[i]+1
+				train.Advantage[i]=0--train.Advantage[i]*(1/train.step[i])
+			end
 		end
-		if(torch.rand(1)[1]>0.7) then
-			train.StartL[i]=1
-			train.End[i]=chrom_width
-		end
+	--	if(torch.rand(1)[1]>0.7) then
+	--		train.StartL[i]=1
+	--		train.End[i]=chrom_width
+	--	end
 	--	if((not flag) and torch.rand(1)[1]>0.7) then
 	--		temp,train.ChrA[i]=Chrom_Model.output[torch.floor(torch.rand(1)[1]*train.state:size(1))+1]:min(1)
 	--	end
@@ -55,11 +57,11 @@ LoadData=function(flag)
 	train.allele=torch.floor((train.ChrA-1)/22)+1
 	--train.cnv=(torch.floor(torch.rand(train.state:size(1))*2))
 	train.cnv=torch.zeros(train.state:size(1))
-	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.7) then
-			train.cnv[i]=1
-		end
-	end
+--	for i=1,train.ChrA:size(1) do
+--		if(torch.rand(1)[1]>0.7) then
+--			train.cnv[i]=1
+--		end
+--	end
 	train.CNV=train.StartL*2+train.cnv-1
 	train.cnv=(train.cnv-0.5)*2
 	train.valid=torch.ones(train.state:size(1))

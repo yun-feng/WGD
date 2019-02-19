@@ -82,7 +82,7 @@ Advantage_cal=function()
 					train.max_cnv[i]=train.start_loci[i][j][2]*2-1
 				end
 				if (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>0) then
-					if  (train.start_loci[i][j][2]*2-1>1) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]>temp_max) then
+					if  (train.start_loci[i][j][2]*2-1>2) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]>temp_max) then
 							temp_max=CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]
 							train.max_cnv[i]=train.start_loci[i][j][2]*2-1-1
 					else
@@ -111,7 +111,6 @@ Advantage_cal=function()
 				temp_end[{{1,temp_start-1},}]:copy(temp_copy[{{1,temp_start-1},}])
 			end
 			temp_end_loci=(temp_copy-temp_end):select(2,1):nonzero()
-			
 			if temp_end_loci[1][1]>1 then
 				temp_max=End_Point_Model.output[temp_end_loci[1][1]-1]
 				temp_max_end=temp_end_loci[1][1]
