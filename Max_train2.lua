@@ -142,7 +142,7 @@ feval_End=function(x)
 				temp_l=0
 			end
 			for j=1,train.end_loci[i]:size(1) do
-				if(train.end_loci[i][j][1]>1 and (train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>0) and temp<End_Point_Model.output[i][train.end_loci[i][j][1]-1]) then
+				if(train.end_loci[i][j][1]>1 and (train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>-0.5) and temp<End_Point_Model.output[i][train.end_loci[i][j][1]-1]) then
 					temp_l=train.end_loci[i][j][1]-1
 					temp=End_Point_Model.output[i][temp_l]
 				end

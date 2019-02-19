@@ -57,11 +57,11 @@ LoadData=function(flag)
 	train.allele=torch.floor((train.ChrA-1)/22)+1
 	--train.cnv=(torch.floor(torch.rand(train.state:size(1))*2))
 	train.cnv=torch.zeros(train.state:size(1))
---	for i=1,train.ChrA:size(1) do
---		if(torch.rand(1)[1]>0.7) then
---			train.cnv[i]=1
---		end
---	end
+	for i=1,train.ChrA:size(1) do
+		if(torch.rand(1)[1]>0.7) then
+			train.cnv[i]=1
+		end
+	end
 	train.CNV=train.StartL*2+train.cnv-1
 	train.cnv=(train.cnv-0.5)*2
 	train.valid=torch.ones(train.state:size(1))
@@ -137,7 +137,7 @@ LoadData=function(flag)
 		
 	--train.Advantage=torch.Tensor(train.state:size(1));
 	train.max_cnv=torch.zeros(train.Advantage:size(1)) 
-	--train.max_end=torch.zeros(train.Advantage:size(1)) 
+	train.max_end=torch.zeros(train.Advantage:size(1)) 
 	--train.max_end_new=torch.zeros(train.Advantage:size(1)) 
 	train.Advantage2=torch.zeros(train.Advantage:size())
 	--train.chrom_state_new2=train.chrom_state:clone()
