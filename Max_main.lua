@@ -34,6 +34,10 @@ for c=0,cycle do
     print(string.format("Error: %6.6f",Error));
 	Loss=torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1))
     print(string.format("Loss: %6.6f",Loss));
+    temp=train.state:clone()
+    LoadData_Reverse()
+    model_train()
+    train.state=temp
     print("Save model");
     torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);
     torch.save(wkdir.."Model_CNV_Model",CNV_Model);

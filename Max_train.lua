@@ -50,7 +50,7 @@ feval_Chrom=function(x)
     
     
     Chrom_Model:zeroGradParameters();
-    
+    Chrom_Model:forward(train.state)
 	--normalization for kernal 
     for i = 1,#Chrom_Model.modules do
         if string.find(tostring(Chrom_Model.modules[i]), 'SpatialConvolution') then
@@ -197,3 +197,4 @@ function model_train()
 	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
 	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 end
+

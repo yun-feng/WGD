@@ -131,8 +131,9 @@ Advantage_cal=function()
 			for j=temp_start,temp_max_end do
 				train.next[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+j-train.allele[i]*22*chrom_width+22*chrom_width][1]=train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+j-train.allele[i]*22*chrom_width+22*chrom_width][1]+temp_action
 			end
-			train.max_end[i]=temp_max_end	
-			train.Advantage2[i]=train.Advantage2[i]+Reward(train.ChrA[i],temp_start,temp_max_end,train.state[i],train.next[i])
+			train.max_end[i]=temp_max_end
+			train.max_Reward[i]=Reward(train.ChrA[i],temp_start,temp_max_end,train.state[i],train.next[i])
+			train.Advantage2[i]=train.Advantage2[i]+train.max_Reward[i]
 			
 		end
 		
@@ -184,4 +185,36 @@ Advantage_cal=function()
 	train.Advantage=train.Advantage-train.Advantage2
 	
 	return train.Advantage;
+end
+
+Advantage_cal_Reverse=function()
+
+	Chrom_Model:forward(train.next)
+	train.Advantage2=train.Advantage2+train.max_Reward:clone()
+
+	train.max_next=-Chrom_Model.output:min(2):resize(train.Reward:size())
+	for i=1,train.state:size(1) do
+			if(torch.sum(torch.abs(train.next[i]-1))*math.log(single_loci_loss) > train.max_next[i]) then
+				train.max_next[i]=torch.sum(torch.abs(train.next[i]-1))*math.log(single_loci_loss)
+			end
+			if(torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
+				local wgd_loss,wgd_time=WGD_LOSS(train.next[i],0)
+				if(wgd_loss > train.max_next[i]) then
+					train.max_next[i]=wgd_loss
+				end
+			end
+	end
+				
+	train.Advantage2=train.Advantage2+torch.cmul(train.max_next,train.valid);
+	
+	Chrom_Model:forward(train.state)	
+	
+	CNV_Model:forward({train.state,train.chrom_state})
+	
+	for i = 1,train.state:size(1) do
+
+		if train.valid[i]>0 then
+			train.Advantage2[i]=train.Advantage2[i]+Chrom_Model.output[i][train.ChrA[i]]
+		end
+	end
 end
