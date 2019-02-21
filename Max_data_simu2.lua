@@ -33,7 +33,7 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.95/(1+math.exp(-2e-4*counter))) then
+		if(torch.rand(1)[1]>0.95/(1+math.exp(-2e-4*counter+2))) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
@@ -45,10 +45,10 @@ LoadData=function(flag)
 				train.Advantage[i]=0--train.Advantage[i]*(1/train.step[i])
 			end
 		end
-	--	if(torch.rand(1)[1]>0.7) then
-	--		train.StartL[i]=1
-	--		train.End[i]=chrom_width
-	--	end
+		if(torch.rand(1)[1]>0.7) then
+			train.StartL[i]=1
+			train.End[i]=chrom_width
+		end
 	--	if((not flag) and torch.rand(1)[1]>0.7) then
 	--		temp,train.ChrA[i]=Chrom_Model.output[torch.floor(torch.rand(1)[1]*train.state:size(1))+1]:min(1)
 	--	end
@@ -159,7 +159,7 @@ LoadData_Reverse=function()
 	train.CNV=train.StartL*2+train.cnv-1
 	train.cnv=(train.cnv-0.5)*2
 
-	train.valid=torch.ones(train.state:size(1))
+--	train.valid=torch.ones(train.state:size(1))
 	train.start_loci={}
 	train.end_loci={}
 	

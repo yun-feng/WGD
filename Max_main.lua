@@ -8,6 +8,11 @@ wkdir="/data/ted/WGD/Max_"
 
 dofile (wkdir.."Policy.lua");
 
+Chrom_Model=torch.load(wkdir.."Model_Chrom_Model");
+CNV_Model=torch.load(wkdir.."Model_CNV_Model");
+End_Point_Model=torch.load(wkdir.."Model_End_Point_Model");
+
+
 dofile (wkdir.."Advantage2.lua");
 dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
@@ -34,10 +39,12 @@ for c=0,cycle do
     print(string.format("Error: %6.6f",Error));
 	Loss=torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1))
     print(string.format("Loss: %6.6f",Loss));
-    temp=train.state:clone()
-    LoadData_Reverse()
-    model_train()
-    train.state=temp
+  --  if torch.rand(1)[1]> 0.8/(1+2*math.exp(-2e-4*counter)) then
+	temp=train.state:clone()
+	LoadData_Reverse()
+	model_train()
+	train.state=temp
+  --  end
     print("Save model");
     torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);
     torch.save(wkdir.."Model_CNV_Model",CNV_Model);

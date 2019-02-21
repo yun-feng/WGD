@@ -41,7 +41,9 @@ Chrom_Net:add(nn.Threshold(0, 1e-6))
 Chrom_Net:add(nn.Linear(nkernels[5] ,nkernels[5]))
 --Chrom_Net:add(nn.AddConstant(10))
 --Chrom_Net:add(nn.SoftMax())
---Chrom_Net:add(nn.Exp())
+Chrom_Net:add(nn.Exp())
+--Chrom_Net:add(nn.ELU(1))
+--Chrom_Net:add(nn.AddConstant(1))
 --Chrom_Net:add(nn.AddConstant(-math.log(5e-5*0.99)))
 
 Chrom_Model=Chrom_Net;
