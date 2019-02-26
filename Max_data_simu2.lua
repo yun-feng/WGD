@@ -18,10 +18,11 @@ LoadData=function(flag)
 	--otherwise use the next state as input
 	if flag then
 		train.state=torch.ones(25,2,1100,1)
-        train.next=torch.ones(25,2,1100,1)
+        	train.next=torch.ones(25,2,1100,1)
 		train.Advantage=torch.zeros(25)
-		train.step=torch.zeros(25)
+		train.step=torch.zeros(25)-1
 		train.valid=torch.ones(25)
+		train.Advantage2=torch.zeros(25)
 	end
 
 --	if not flag then
@@ -33,17 +34,21 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.95/(1+math.exp(-2e-4*counter+2))) then
+		if(torch.rand(1)[1]>0.9/(1+math.exp(-2e-4*counter+2))) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
 			train.step[i]=0
 		else
-			if(train.valid[i]>0) then
+			if(train.valid[i]>0 and ( torch.abs(train.Advantage2[i])<3)) then
 				train.next[i]=train.state[i]:clone()
 				train.step[i]=train.step[i]+1
 				train.Advantage[i]=0--train.Advantage[i]*(1/train.step[i])
+			else
+				train.state[i]=train.next[i]:clone()
+				train.Advantage[i]=0
 			end
+	
 		end
 		if(torch.rand(1)[1]>0.7) then
 			train.StartL[i]=1
@@ -73,9 +78,9 @@ LoadData=function(flag)
 		
 
 	for i=1,train.ChrA:size(1) do
-		if (torch.rand(1)[1]>0.9 and train.state[i]:sum()<2200*4) then
-			--train.state[i]=train.state[i]*2
-			--train.next[i]=train.next[i]*2
+		if (counter>30000 and torch.abs(train.Advantage2[i])<3 and torch.rand(1)[1]>0.95 and train.state[i]:sum()<2200*4) then
+			train.state[i]=train.state[i]*2
+			train.next[i]=train.next[i]*2
 		end
 		train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i],train.allele[i])
                 train.chrom_state_new[i]=train.chrom_state[i]:clone()
@@ -159,7 +164,7 @@ LoadData_Reverse=function()
 	train.CNV=train.StartL*2+train.cnv-1
 	train.cnv=(train.cnv-0.5)*2
 
---	train.valid=torch.ones(train.state:size(1))
+	train.valid=torch.ones(train.state:size(1))
 	train.start_loci={}
 	train.end_loci={}
 	

@@ -14,36 +14,37 @@ nkernels = {160,240,480,960,22*2}
 --determin which chromosome to change
 Chrom_Net = nn.Sequential()
 
-
-Chrom_Net:add(nn.SpatialConvolution(nfeats, nkernels[1], 1, 7, 1, 1, 0,3))
+Chrom_Net:add(nn.AddConstant(-1))
+Chrom_Net:add(nn.Reshape(1,2*1100,1))
+Chrom_Net:add(nn.SpatialConvolution(nfeats/2, nkernels[1], 1, 7, 1, 1, 0,3))
 Chrom_Net:add(nn.Threshold(0, 1e-6))
-Chrom_Net:add(nn.SpatialMaxPooling(1,4,1,4,0,2))
+Chrom_Net:add(nn.SpatialMaxPooling(1,3,1,3,0,1))
 --Chrom_Net:add(nn.Dropout(0.2))
 
 Chrom_Net:add(nn.SpatialConvolution(nkernels[1], nkernels[2], 1, 8, 1, 1, 0,3))
 Chrom_Net:add(nn.Threshold(0, 1e-6))
-Chrom_Net:add(nn.SpatialMaxPooling(1,4,1,4,0,2))
+Chrom_Net:add(nn.SpatialMaxPooling(1,2,1,2,0,1))
 --Chrom_Net:add(nn.Dropout(0.2))
 
 Chrom_Net:add(nn.SpatialConvolution(nkernels[2], nkernels[3], 1, 8, 1, 1, 0,3))
 Chrom_Net:add(nn.Threshold(0, 1e-6))
 ---Chrom_Net:add(nn.Dropout(0.5))
---Chrom_Net:add(nn.SpatialMaxPooling(1,4,1,4,0,2))
+Chrom_Net:add(nn.SpatialMaxPooling(1,2,1,2,0,1))
 
---Chrom_Net:add(nn.SpatialConvolution(nkernels[3], nkernels[4], 1, 8, 1, 1, 0,3))
---Chrom_Net:add(nn.Threshold(0, 1e-6))
+Chrom_Net:add(nn.SpatialConvolution(nkernels[3], nkernels[4], 1, 8, 1, 1, 0,3))
+Chrom_Net:add(nn.Threshold(0, 1e-6))
 
 nchannel=Chrom_Net:forward(torch.ones(2,1100,1)):size(2)
 --nchannel = math.floor((math.floor((width)/4.0))/4.0)
-Chrom_Net:add(nn.Reshape(nkernels[3]*nchannel))
-Chrom_Net:add(nn.Linear(nkernels[3]*nchannel, nkernels[5]))
+Chrom_Net:add(nn.Reshape(nkernels[4]*nchannel))
+Chrom_Net:add(nn.Linear(nkernels[4]*nchannel, nkernels[5]))
 Chrom_Net:add(nn.Threshold(0, 1e-6))
 Chrom_Net:add(nn.Linear(nkernels[5] ,nkernels[5]))
 --Chrom_Net:add(nn.AddConstant(10))
 --Chrom_Net:add(nn.SoftMax())
-Chrom_Net:add(nn.Exp())
+--Chrom_Net:add(nn.Exp())
 --Chrom_Net:add(nn.ELU(1))
---Chrom_Net:add(nn.AddConstant(1))
+--Chrom_Net:add(nn.AddConstant(400))
 --Chrom_Net:add(nn.AddConstant(-math.log(5e-5*0.99)))
 
 Chrom_Model=Chrom_Net;

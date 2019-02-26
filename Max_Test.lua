@@ -22,6 +22,19 @@ dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
 counter=100000
 
+Chrom_Model.output
+
+LoadData(1)
+
+Chrom_Model:forward(train.state)
+
+a,b=Chrom_Model.output:min(2)
+x=torch.Tensor(25)
+for i=1,25 do
+x[i]=b[i]-train.ChrA[i]
+end
+
+
 
 train.next=torch.ones(1,2,22*50,1)
 flag=false
