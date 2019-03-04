@@ -39,6 +39,7 @@ for c=0,cycle do
     print(string.format("Error: %6.6f",Error));
 	Loss=torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1))
     print(string.format("Loss: %6.6f",Loss));
+    print(string.format("step: %6.6f",train.step:sum()/train.step:size(1)))
   --  if torch.rand(1)[1]> 0.8/(1+2*math.exp(-2e-4*counter)) then
 	temp=train.state:clone()
 	temp_next=train.next:clone()
