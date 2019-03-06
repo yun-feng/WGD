@@ -18,7 +18,7 @@ dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
 
 cycle=100000000
-counter=0--10000;
+counter=0;
 LoadData(true)
 
 for c=0,cycle do

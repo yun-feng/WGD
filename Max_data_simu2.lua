@@ -78,7 +78,7 @@ LoadData=function(flag)
 		
 
 	for i=1,train.ChrA:size(1) do
-		if (counter>30000 and torch.abs(train.Advantage2[i])<3 and torch.rand(1)[1]>0.5 and train.state[i]:sum()<2200*4) then
+		if (torch.abs(train.Advantage2[i])<3 and torch.rand(1)[1]<0.5/(1+math.exp(-2e-4*counter+8)) and train.state[i]:sum()<2200*3) then
 			train.state[i]=train.state[i]*2
 			train.next[i]=train.next[i]*2
 		end

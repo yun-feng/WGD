@@ -20,7 +20,7 @@ End_Point_Model=torch.load(wkdir.."Model_End_Point_Model");
 dofile (wkdir.."Advantage2.lua");
 dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
-counter=100000
+counter=20000
 
 Chrom_Model.output
 
