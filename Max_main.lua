@@ -8,9 +8,9 @@ wkdir="/data/ted/WGD/Max_"
 
 dofile (wkdir.."Policy.lua");
 
---Chrom_Model=torch.load(wkdir.."Model_Chrom_Model");
---CNV_Model=torch.load(wkdir.."Model_CNV_Model");
---End_Point_Model=torch.load(wkdir.."Model_End_Point_Model");
+--Chrom_Model=torch.load(wkdir.."Model_Chrom_Model2");
+CNV_Model=torch.load(wkdir.."Model_CNV_Model2");
+End_Point_Model=torch.load(wkdir.."Model_End_Point_Model2");
 
 
 dofile (wkdir.."Advantage2.lua");
@@ -18,7 +18,7 @@ dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
 
 cycle=100000000
-counter=0;
+counter=100000;
 LoadData(true)
 
 for c=0,cycle do
