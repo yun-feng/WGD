@@ -42,7 +42,7 @@ LoadData=function(flag)
 			train.step[i]=0
 			train.WGD[i]=0
 		else
-			if(train.valid[i]>0 and ( torch.abs(train.Advantage2[i])<3)) then
+			if((train.valid[i]>0) and ( torch.abs(train.Advantage2[i])<3)) then
 				train.next[i]=train.state[i]:clone()
 				train.step[i]=train.step[i]+1
 				train.Advantage[i]=0--train.Advantage[i]*(1/train.step[i])
@@ -247,6 +247,7 @@ LoadData_Reverse=function()
 	--train.chrom_state_new2=train.chrom_state:clone()
 	Advantage_cal();
 	--train.Advantage=torch.cmul(train.Advantage,train.valid)
+	train.Advantage2=train.Advantage2
 
 end
 

@@ -64,6 +64,15 @@ feval_Chrom=function(x)
 	for i= 1,grad:size(1) do
 	if train.valid[i]>0 then
 		grad[i][train.ChrA[i]]=train.Advantage2[i]/(train.Advantage:size(1))
+		if(train.WGD[i]<0.5) then
+			temp_chr=torch.Tensor(44):copy(torch.gt(torch.abs((train.state[i]-1)):resize(2,22,50):sum(3),0.5):resize(44))
+		else
+			temp_chr=torch.Tensor(44):copy(torch.gt(torch.abs((train.state[i]-torch.floor(train.state[i]/2)*2)):resize(2,22,50):sum(3),0.5):resize(44))
+		end
+
+	      local	temp=Chrom_Model.output[i]-(Chrom_Model.output[i][train.ChrA[i]]-train.Advantage2[i])
+		temp=torch.cmul(nn.ReLU():forward(temp),temp_chr)-torch.cmul(nn.ReLU():forward(-temp),(1-temp_chr))
+		grad[i]=grad[i]+temp/(train.Advantage:size(1))
 	end
 	end
 	

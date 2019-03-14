@@ -8,9 +8,9 @@ wkdir="/data/ted/WGD/Max_"
 
 dofile (wkdir.."Policy.lua");
 
---Chrom_Model=torch.load(wkdir.."Model_Chrom_Model2");
-CNV_Model=torch.load(wkdir.."Model_CNV_Model2");
-End_Point_Model=torch.load(wkdir.."Model_End_Point_Model2");
+Chrom_Model=torch.load(wkdir.."Model_Chrom_Model3");
+CNV_Model=torch.load(wkdir.."Model_CNV_Model3");
+End_Point_Model=torch.load(wkdir.."Model_End_Point_Model3");
 
 
 dofile (wkdir.."Advantage2.lua");
