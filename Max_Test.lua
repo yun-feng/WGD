@@ -34,7 +34,24 @@ for i=1,25 do
 x[i]=b[i]-train.ChrA[i]
 end
 
-
+test_chr=function(step)
+	chr_set=torch.Tensor(25,step)
+	LoadData(1)
+	chr_set:select(2,1):copy(train.ChrA)
+	for i =1,step-1 do
+		LoadData_f(false)
+		chr_set:select(2,i+1):copy(train.ChrA)
+	end
+	Chrom_Model:forward(train.state)
+	a,b=Chrom_Model.output:min(2)
+	b=torch.DoubleTensor(25):copy(b:select(2,1))
+	s=chr_set:select(2,1)-b
+	for i =1,step-1 do
+		s=torch.cmul(s,chr_set:select(2,i+1)-b)
+		s=s:abs()
+		s=torch.ceil(s/1000)
+	end
+end
 
 train.next=torch.ones(1,2,22*50,1)
 flag=false
