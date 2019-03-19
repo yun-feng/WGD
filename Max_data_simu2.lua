@@ -2,7 +2,7 @@ require "torch"
 
 require "math"
 
-
+batch_sample=15
 chrom_extract=function(cnp,chrom,allele)
 	--if chrom<=1 then
 	--	return torch.zeros(1,chrom_width,1);
@@ -17,13 +17,13 @@ LoadData=function(flag)
 	--when flag is true, load data from file
 	--otherwise use the next state as input
 	if flag then
-		train.state=torch.ones(25,2,1100,1)
-        	train.next=torch.ones(25,2,1100,1)
-		train.Advantage=torch.zeros(25)
-		train.step=torch.zeros(25)-1
-		train.valid=torch.ones(25)
-		train.Advantage2=torch.zeros(25)
-		train.WGD=torch.zeros(25)
+		train.state=torch.ones(batch_sample,2,1100,1)
+        	train.next=torch.ones(batch_sample,2,1100,1)
+		train.Advantage=torch.zeros(batch_sample)
+		train.step=torch.zeros(batch_sample)-1
+		train.valid=torch.ones(batch_sample)
+		train.Advantage2=torch.zeros(batch_sample)
+		train.WGD=torch.zeros(batch_sample)
 	end
 
 --	if not flag then
@@ -35,7 +35,7 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.98/(1+math.exp(-2e-4*counter+2))  ) then --or torch.abs(train.Advantage2[i])>=5) then
+		if(torch.rand(1)[1]>0.98/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=100) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
@@ -80,7 +80,7 @@ LoadData=function(flag)
 		
 
 	for i=1,train.ChrA:size(1) do
-		if (torch.abs(train.Advantage2[i])<3 and torch.rand(1)[1]<0.1/((1+math.exp(-2e-4*counter+8))*(1+math.exp(-train.step[i]+5))) and train.WGD[i]<3) then
+		if (torch.abs(train.Advantage2[i])<3 and torch.rand(1)[1]<0.1/((1+math.exp(-1e-4*counter+2))*(1+math.exp(-train.step[i]+5))) and train.WGD[i]<3) then
 			train.state[i]=train.state[i]*2
 			train.next[i]=train.next[i]*2
 			train.WGD[i]=1
@@ -176,6 +176,9 @@ LoadData_Reverse=function()
 		
 
 	for i=1,train.ChrA:size(1) do
+		if temp_Advantage[i]>6 then
+			train.valid[i]=0
+		end
 		if (torch.rand(1)[1]>0.9 and train.state[i]:sum()<2200*4) then
 			--train.state[i]=train.state[i]*2
 			--train.next[i]=train.next[i]*2
@@ -256,13 +259,13 @@ end
 
 LoadData_f=function(flag)
         if flag then
-                train.state=torch.ones(25,2,1100,1)
-                train.next=torch.ones(25,2,1100,1)
-                train.Advantage=torch.zeros(25)
-                train.step=torch.zeros(25)-1
-                train.valid=torch.ones(25)
-                train.Advantage2=torch.zeros(25)
-                train.WGD=torch.zeros(25)
+                train.state=torch.ones(batch_sample,2,1100,1)
+                train.next=torch.ones(batch_sample,2,1100,1)
+                train.Advantage=torch.zeros(batch_sample)
+                train.step=torch.zeros(batch_sample)-1
+                train.valid=torch.ones(batch_sample)
+                train.Advantage2=torch.zeros(batch_sample)
+                train.WGD=torch.zeros(batch_sample)
         end
 
 

@@ -6,11 +6,11 @@ train={};
 wkdir="/data/ted/WGD/Max_"
 
 
-dofile (wkdir.."Policy.lua");
+dofile (wkdir.."Policy2.lua");
 
-Chrom_Model=torch.load(wkdir.."Model_Chrom_Model3");
-CNV_Model=torch.load(wkdir.."Model_CNV_Model3");
-End_Point_Model=torch.load(wkdir.."Model_End_Point_Model3");
+Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com");
+CNV_Model=torch.load(wkdir.."Model_CNV_Model_com");
+End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_com");
 
 
 dofile (wkdir.."Advantage2.lua");
@@ -18,7 +18,7 @@ dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
 
 cycle=100000000
-counter=10000;
+counter=1600;
 LoadData(true)
 
 for c=0,cycle do
@@ -32,6 +32,8 @@ for c=0,cycle do
 	print(string.format("Start cycle %d", c));
     print("Loading data");
 	LoadData(flag);
+--train.Advantage2:zero()
+--train.Advantage:zero()
 --Advantage_cal();
     print("Start train");
 	model_train();
@@ -53,9 +55,9 @@ for c=0,cycle do
 	train.next=temp_next
   --  end
     print("Save model");
-    torch.save(wkdir.."Model_Chrom_Model",Chrom_Model);
-    torch.save(wkdir.."Model_CNV_Model",CNV_Model);
-	torch.save(wkdir.."Model_End_Point_Model",End_Point_Model);
+    torch.save(wkdir.."Model_Chrom_Model_com",Chrom_Model);
+    torch.save(wkdir.."Model_CNV_Model_com",CNV_Model);
+	torch.save(wkdir.."Model_End_Point_Model_com",End_Point_Model);
 	
 
 end

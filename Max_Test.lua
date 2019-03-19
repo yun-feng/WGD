@@ -8,14 +8,15 @@ wkdir="/data/ted/WGD/Max_"
 opt={}
 train={}
 
-dofile (wkdir.."Policy.lua");
+dofile (wkdir.."Policy2.lua");
+batch_sample=10
 --dofile (wkdir.."Advantage.lua");
 --dofile (wkdir.."train.lua");
 --dofile (wkdir.."data.lua");
 
-Chrom_Model=torch.load(wkdir.."Model_Chrom_Model");
-CNV_Model=torch.load(wkdir.."Model_CNV_Model");
-End_Point_Model=torch.load(wkdir.."Model_End_Point_Model");
+Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com");
+CNV_Model=torch.load(wkdir.."Model_CNV_Model_com");
+End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_com");
 
 dofile (wkdir.."Advantage2.lua");
 dofile (wkdir.."train2.lua");
@@ -29,13 +30,13 @@ LoadData(1)
 Chrom_Model:forward(train.state)
 
 a,b=Chrom_Model.output:min(2)
-x=torch.Tensor(25)
-for i=1,25 do
+x=torch.Tensor(batch_sample)
+for i=1,batch_sample do
 x[i]=b[i]-train.ChrA[i]
 end
 
 test_chr=function(step)
-	chr_set=torch.Tensor(25,step)
+	chr_set=torch.Tensor(batch_sample,step)
 	LoadData(1)
 	chr_set:select(2,1):copy(train.ChrA)
 	for i =1,step-1 do
@@ -44,7 +45,7 @@ test_chr=function(step)
 	end
 	Chrom_Model:forward(train.state)
 	a,b=Chrom_Model.output:min(2)
-	b=torch.DoubleTensor(25):copy(b:select(2,1))
+	b=torch.DoubleTensor(batch_sample):copy(b:select(2,1))
 	s=chr_set:select(2,1)-b
 	for i =1,step-1 do
 		s=torch.cmul(s,chr_set:select(2,i+1)-b)
