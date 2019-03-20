@@ -18,7 +18,7 @@ dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
 
 cycle=100000000
-counter=1600;
+counter=15000;
 LoadData(true)
 
 for c=0,cycle do
@@ -36,7 +36,17 @@ for c=0,cycle do
 --train.Advantage:zero()
 --Advantage_cal();
     print("Start train");
-	model_train();
+	split_train=0;
+	while(torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1)) > 6) do
+		split_train=split_train+1;
+		train.Advantage2=train.Advantage2/2
+	end
+	while (split_train>0.5) do
+		model_train();
+		Advantage_cal()
+		split_train=split_train-1;
+	end
+
 	Error=torch.log(torch.sum(torch.pow(train.Advantage,2))/train.Advantage:size(1))
     print(string.format("Error: %6.6f",Error));
 	Loss=torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1))
@@ -48,7 +58,15 @@ for c=0,cycle do
 	temp_valid=train.valid:clone()
 	temp_Advantage=train.Advantage2:clone()
 	LoadData_Reverse()
-	model_train()
+	        split_train=0;
+        while(torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1)) > 6) do
+                split_train=split_train+1;
+                train.Advantage2=train.Advantage2/2
+        end
+        while (split_train>0.5) do
+                model_train();
+                split_train=split_train-1;
+        end
 	train.state=temp
 	train.valid=temp_valid
 	train.Advantage2=temp_Advantage
