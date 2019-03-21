@@ -35,7 +35,7 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.98/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=50) then
+		if(torch.rand(1)[1]>0.98/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=10) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
@@ -80,10 +80,16 @@ LoadData=function(flag)
 		
 
 	for i=1,train.ChrA:size(1) do
-		if (torch.abs(train.Advantage2[i])<3 and torch.rand(1)[1]<0.1/((1+math.exp(-train.step[i]+5))) and train.WGD[i]<3) then
+		if (torch.abs(train.Advantage2[i])<3 and torch.rand(1)[1]<0.1/(1+math.exp(-train.step[i]+math.min(5,torch.sum(train.step)/batch_sample))) and train.WGD[i]<3) then
 			train.state[i]=train.state[i]*2
 			train.next[i]=train.next[i]*2
 			train.WGD[i]=1
+			train.cnv[i]=-train.cnv[i]
+			if(torch.rand(1)[1]>0.8) then
+				train.StartL[i]=1
+				train.End[i]=50
+			end
+			train.CNV[i]=train.StartL[i]*2+torch.floor((train.cnv[i]+1)/2)-1
 		end
 		train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i],train.allele[i])
                 train.chrom_state_new[i]=train.chrom_state[i]:clone()
@@ -257,7 +263,7 @@ end
 
 
 
-LoadData_f=function(flag)
+LoadData_f=function(flag,wgd_f)
         if flag then
                 train.state=torch.ones(batch_sample,2,1100,1)
                 train.next=torch.ones(batch_sample,2,1100,1)
@@ -316,7 +322,7 @@ LoadData_f=function(flag)
 
 
         for i=1,train.ChrA:size(1) do
-                if (torch.abs(train.Advantage2[i])<3 and torch.rand(1)[1]<0.1/((1+math.exp(-2e-4*counter+2))*(1+math.exp(-train.step[i]+5))) and train.WGD[i]<3) then
+                if (wgd_f or (torch.abs(train.Advantage2[i])<3 and torch.rand(1)[1]<0.1/((1+math.exp(-2e-4*counter+2))*(1+math.exp(-train.step[i]+5))) and train.WGD[i]<3)) then
                         train.state[i]=train.state[i]*2
                         train.next[i]=train.next[i]*2
                         train.WGD[i]=1

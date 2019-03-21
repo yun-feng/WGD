@@ -52,7 +52,7 @@ feval_Chrom=function(x)
     Chrom_Model:zeroGradParameters();
     Chrom_Model:forward(train.state)
 	--normalization for kernal 
-    for i = 1,#Chrom_Model.modules do
+    for i = 1,15 do--#Chrom_Model.modules do
         if string.find(tostring(Chrom_Model.modules[i]), 'SpatialConvolution') then
                 Chrom_Model.modules[i].weight:renorm(2,1,opt.KernelMax)
         end

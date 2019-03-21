@@ -6,9 +6,9 @@ train={};
 wkdir="/data/ted/WGD/Max_"
 
 
-dofile (wkdir.."Policy2.lua");
+dofile (wkdir.."Policy2_nl.lua");
 
-Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com");
+--Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com");
 CNV_Model=torch.load(wkdir.."Model_CNV_Model_com");
 End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_com");
 
@@ -18,7 +18,7 @@ dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
 
 cycle=100000000
-counter=15000;
+counter=0--10000;
 LoadData(true)
 
 for c=0,cycle do
@@ -36,14 +36,17 @@ for c=0,cycle do
 --train.Advantage:zero()
 --Advantage_cal();
     print("Start train");
-	split_train=0;
+	split_train=1;
+	temp_Advantage=train.Advantage2;
 	while(torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1)) > 6) do
 		split_train=split_train+1;
-		train.Advantage2=train.Advantage2/2
+		train.Advantage2=temp_Advantage/split_train
 	end
+	temp_split=split_train
 	while (split_train>0.5) do
 		model_train();
 		Advantage_cal()
+		train.Advantage2=train.Advantage2/temp_split
 		split_train=split_train-1;
 	end
 
@@ -56,7 +59,7 @@ for c=0,cycle do
 	temp=train.state:clone()
 	temp_next=train.next:clone()
 	temp_valid=train.valid:clone()
-	temp_Advantage=train.Advantage2:clone()
+--	temp_Advantage=train.Advantage2:clone()
 	LoadData_Reverse()
 	        split_train=0;
         while(torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1)) > 6) do

@@ -50,7 +50,7 @@ Advantage_cal=function()
 				train.max_next[i]=torch.sum(torch.abs(train.next[i]-1))*math.log(single_loci_loss)
 			end
 			if(train.WGD_flag[i]==1) then
-				local wgd_loss,wgd_time=WGD_LOSS(train.next[i],0)
+				local wgd_loss,wgd_time=WGD_LOSS(train.next[i]/2,0)
 				if(wgd_loss > train.max_next[i]) then
 					train.max_next[i]=wgd_loss
 					train.wgd_times[i]=wgd_time
@@ -147,7 +147,7 @@ Advantage_cal=function()
 				train.max_next[i]=torch.sum(torch.abs(train.next[i]-1))*math.log(single_loci_loss)
 			end
 			if((torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
-				local wgd_loss,wgd_time=WGD_LOSS(train.next[i],0)
+				local wgd_loss,wgd_time=WGD_LOSS(train.next[i]/2,0)
 				if(wgd_loss > train.max_next[i]) then
 					train.max_next[i]=wgd_loss
 				end
