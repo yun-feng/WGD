@@ -38,14 +38,17 @@ Chrom_Net:add(nn.Threshold())
 
 Chrom_Net:add(nn.Replicate(2))
 Chrom_Net:add(nn.SplitTable(1))
+p0=nn.ParallelTable()
+p0:add(nn.Sequential():add(nn.SpatialConvolution(nkernels[4]/2, 5, 4, 1, 1, 1, 0,0)):add(nn.Sum(3,4)):add(nn.Sigmoid()):add(nn.Replicate(44,3)):add(nn.Reshape(5,44)))
 
 p1=nn.ParallelTable()
                                                                      
-p1:add(nn.Sequential():add(nn.SpatialConvolution(nkernels[4]/2, 5, 4, 1, 1, 1, 0,0)):add(nn.ELU()):add(nn.Reshape(5,44)))
-p1:add(nn.Sequential():add(nn.SpatialConvolution(nkernels[4]/2, 5, 4, 1, 1, 1, 0,0)):add(nn.Sum(3,4)):add(nn.ELU()):add(nn.Replicate(44,3)):add(nn.Reshape(5,44)))
+p1:add(nn.Sequential():add(nn.SpatialConvolution(nkernels[4]/2, 5, 4, 1, 1, 1, 0,0)):add(nn.Reshape(5,44)))
+p1:add(nn.Sequential():add(nn.SpatialConvolution(nkernels[4]/2, 5, 4, 1, 1, 1, 0,0)):add(nn.Sum(3,4)):add(nn.Replicate(44,3)):add(nn.Reshape(5,44)))
 
-Chrom_Net:add(p1)
-Chrom_Net:add(nn.CAddTable())
+p0:add(nn.Sequential():add(nn.Replicate(2)):add(nn.SplitTable(1)):add(p1):add(nn.CAddTable()):add(nn.ELU()))
+Chrom_Net:add(p0)
+Chrom_Net:add(nn.CMulTable())
 Chrom_Net:add(nn.Sum(2))
 
 --nchannel=Chrom_Net:forward(torch.ones(2,1100,1)):size(2)

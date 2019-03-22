@@ -88,6 +88,7 @@ LoadData=function(flag)
 			if(torch.rand(1)[1]>0.8) then
 				train.StartL[i]=1
 				train.End[i]=50
+				train.cnv[i]=1
 			end
 			train.CNV[i]=train.StartL[i]*2+torch.floor((train.cnv[i]+1)/2)-1
 		end
