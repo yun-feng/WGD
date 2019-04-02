@@ -467,16 +467,20 @@ LoadData_t=function(step)
 	
 end
 
-Deconvolute=function(cnp,max_step=25)
+Deconvolute=function(cnp,max_step)
 			current_step=0
+			test.ChrA:zero()
+			test.CNV:zero()
+			test.End:zero()
 			while(current_step<max_step) do
 				current_step=current_step+1
 				Chrom_Model:forward(cnp)
 				local max_reward,max_chr=Chrom_Model.output:min(2)
 				local max_cnv=-1
 				local max_end=0
-				
-				max_reward=-max_reward
+					
+				max_reward=-max_reward[1][1]
+				max_chr=max_chr[1][1]
 				
 				if(torch.sum(torch.abs(cnp-2*torch.floor(cnp/2))) <1) then
 					local wgd_loss,wgd_time=WGD_LOSS(cnp/2,0)
@@ -566,7 +570,7 @@ Deconvolute=function(cnp,max_step=25)
 				end
 				
 				if max_chr<0 then
-					cnp=cnp/2
+					cnp:copy(cnp/2)
 				end
 			
 				test.ChrA[current_step]=max_chr
