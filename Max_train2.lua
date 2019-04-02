@@ -162,7 +162,7 @@ feval_End=function(x)
 		end
     end
 	
-    End_Point_Model:backward({train.chrom_state,train.chrom_state_new},grad);
+    End_Point_Model:backward({train.chrom_state,train.chrom_state_new,train.state},grad);
     
     return f,parGrad_End;
 end
