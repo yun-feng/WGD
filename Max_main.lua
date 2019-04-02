@@ -8,7 +8,7 @@ wkdir="/data/ted/WGD/Max_"
 
 dofile (wkdir.."Policy2_nl.lua");
 
---Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com");
+Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com");
 CNV_Model=torch.load(wkdir.."Model_CNV_Model_com");
 End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_com");
 
@@ -18,7 +18,7 @@ dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
 
 cycle=100000000
-counter=0--10000;
+counter=10000;
 LoadData(true)
 
 for c=0,cycle do
@@ -37,7 +37,7 @@ for c=0,cycle do
 --Advantage_cal();
     print("Start train");
 	split_train=1;
-	temp_Advantage=train.Advantage2;
+	temp_Advantage=train.Advantage2:clone();
 	while(torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1)) > 6) do
 		split_train=split_train+1;
 		train.Advantage2=temp_Advantage/split_train
