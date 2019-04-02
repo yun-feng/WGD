@@ -467,3 +467,113 @@ LoadData_t=function(step)
 	
 end
 
+Deconvolute=function(cnp,max_step=25)
+			current_step=0
+			while(current_step<max_step) do
+				current_step=current_step+1
+				Chrom_Model:forward(cnp)
+				local max_reward,max_chr=Chrom_Model.output:min(2)
+				local max_cnv=-1
+				local max_end=0
+				
+				max_reward=-max_reward
+				
+				if(torch.sum(torch.abs(cnp-2*torch.floor(cnp/2))) <1) then
+					local wgd_loss,wgd_time=WGD_LOSS(cnp/2,0)
+					if(wgd_loss > max_reward) then
+						max_reward=wgd_loss
+						max_chr=-1
+					end
+				end
+				
+				if(torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss) > max_reward) then
+					max_reward=torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)
+					max_chr=0
+					current_step=max_step
+				end
+				
+				if max_chr>0 then
+					local max_allele=torch.floor((max_chr-1)/22)+1
+					chrom_state=chrom_extract(cnp,max_chr,max_allele)
+					temp_start=torch.zeros(1,chrom_width,1)-1
+					temp_copy=chrom_state:clone()
+					temp_start[{{},{2,50},}]:copy(temp_copy[{{},{1,49},}])
+					temp_start_loci=(temp_copy-temp_start):select(3,1):nonzero()
+					
+					
+					
+					CNV_Model:forward({cnp,chrom_state})
+					
+					temp_max=CNV_Model.output[temp_start_loci[1][2]*2-1]
+					max_cnv=temp_start_loci[1][2]*2-1
+					for j=1,temp_start_loci:size(1) do
+						if(CNV_Model.output[temp_start_loci[j][2]*2-1] > temp_max) then
+							temp_max=CNV_Model.output[temp_start_loci[j][2]*2-1]
+							max_cnv=temp_start_loci[j][2]*2-1
+						end
+						if (chrom_state[1][temp_start_loci[j][2]][1]-1>-0.5) then
+							if  (temp_start_loci[j][2]*2-1>2) and (CNV_Model.output[temp_start_loci[j][2]*2-1-1]>temp_max) then
+									temp_max=CNV_Model.output[temp_start_loci[j][2]*2-1-1]
+									max_cnv=temp_start_loci[j][2]*2-1-1
+							else
+								if (temp_start_loci[j][2]*2-1<2) and (temp_max<0) then
+									temp_max=0
+									max_cnv=0
+								end
+							end
+						end
+					end
+				
+					
+					
+					
+					chrom_state_new=chrom_state:clone()
+					temp_start=torch.floor(max_cnv/2)+1
+					temp_action=2*((max_cnv%2)-0.5)
+					for j=temp_start,chrom_width do
+						chrom_state_new[1][j][1]=chrom_state_new[1][j][1]+temp_action
+					end
+					End_Point_Model:forward({chrom_state,chrom_state_new})
+					
+					temp_end=torch.zeros(chrom_width,1)-1
+					temp_copy=chrom_state[1]
+					temp_end[{{1,49},}]:copy(temp_copy[{{2,50},}])
+					if temp_start>1 then
+						temp_end[{{1,temp_start-1},}]:copy(temp_copy[{{1,temp_start-1},}])
+					end
+					temp_end_loci=(temp_copy-temp_end):select(2,1):nonzero()
+					if temp_end_loci[1][1]>1 then
+						temp_max=End_Point_Model.output[temp_end_loci[1][1]-1]
+						max_end=temp_end_loci[1][1]
+					else
+						temp_max=0
+						max_end=1
+					end
+					for j=1,temp_end_loci:size(1) do
+						if(temp_action>0 or chrom_state[1][temp_end_loci[j][1]][1]-1>-0.5) then
+							if (temp_end_loci[j][1] >1) and (End_Point_Model.output[temp_end_loci[j][1]-1]>temp_max) then
+											temp_max=End_Point_Model.output[temp_end_loci[j][1]-1]
+											max_end=temp_end_loci[j][1]
+							end
+						end
+					end
+					
+					for j=temp_start,max_end do
+						cnp[max_allele][max_chr*chrom_width-chrom_width+j-max_allele*22*chrom_width+22*chrom_width][1]=cnp[max_allele][max_chr*chrom_width-chrom_width+j-max_allele*22*chrom_width+22*chrom_width][1]+temp_action
+					end
+				
+				
+				end
+				
+				if max_chr<0 then
+					cnp=cnp/2
+				end
+			
+				test.ChrA[current_step]=max_chr
+				test.CNV[current_step]=max_cnv+1
+				test.End[current_step]=max_end
+			
+			end
+end
+
+
