@@ -398,7 +398,7 @@ LoadData_t=function(step)
 
 
 		while(step>0.5) do 
-			step=step-1
+			
 			train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1;
 			train.StartL=torch.floor(torch.rand(train.state:size(1))*chrom_width)+1
 			train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
@@ -417,9 +417,9 @@ LoadData_t=function(step)
 			train.CNV=train.StartL*2+train.cnv-1
 			train.cnv=(train.cnv-0.5)*2
 			
-			train.Chr_sample:select(2,step):clone(train.ChrA)
-			train.CNV_sample:select(2,step):clone(train.CNV)
-			train.End_sample:select(2,step):clone(train.End)
+			train.Chr_sample:select(2,step):copy(train.ChrA)
+			train.CNV_sample:select(2,step):copy(train.CNV)
+			train.End_sample:select(2,step):copy(train.End)
 		
 			for i=1,train.ChrA:size(1) do
 				if(train.valid[i]>0)  then
@@ -432,7 +432,7 @@ LoadData_t=function(step)
 				end
 				train.valid=torch.ones(batch_sample)
 			
-                if (torch.rand(1)[1]<0.1/((1+math.exp(-train.step_sample+step+5))) and train.WGD_sample[i]<0.5)) then
+                if (torch.rand(1)[1]<0.1/((1+math.exp(-train.step_sample+step+5))) and train.WGD_sample[i]<0.5) then
                         train.state[i]=train.state[i]*2
                         train.next[i]=train.next[i]*2
                         train.WGD_sample[i]=step
@@ -448,13 +448,14 @@ LoadData_t=function(step)
                 if(train.StartL[i]>1 and torch.abs(train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+train.StartL[i]-train.allele[i]*22*chrom_width+22*chrom_width][1]-train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+train.StartL[i]-1-train.allele[i]*22*chrom_width+22*chrom_width][1])<0.01) then
                         train.valid[i]=0
                 end
-                if(train.End[i]<50 and torch.abs(train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+train.End[i]-train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+train.End[i]+1-train.allele[i]*22*chrom_width+22*chrom_width][1])<0.01) then
+                if(train.End[i]<50 and torch.abs(train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+train.End[i]-train.allele[i]*22*chrom_width+22*chrom_width][1]-train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+train.End[i]+1-train.allele[i]*22*chrom_width+22*chrom_width][1])<0.01) then
                         train.valid[i]=0
                 end
 
 
         end
-		
+	step=step-1
+	end
 		for i=1,train.ChrA:size(1) do
 			if(train.valid[i]<0.5)  then
 			train.state[i]=train.next[i]:clone()
@@ -462,6 +463,7 @@ LoadData_t=function(step)
 			train.CNV_sample[i][step+1]=0
 			train.End_sample[i][step+1]=0
 		end
-
+	end
+	
 end
 
