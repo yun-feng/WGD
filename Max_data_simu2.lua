@@ -430,7 +430,7 @@ LoadData_t=function(step)
 						train.CNV_sample[i][step+1]=0
 						train.End_sample[i][step+1]=0
 				end
-				train.valid=torch.ones(batch_sample)
+				train.valid[i]=1
 			
                 if (torch.rand(1)[1]<0.1/((1+math.exp(-train.step_sample+step+5))) and train.WGD_sample[i]<0.5) then
                         train.state[i]=train.state[i]*2
