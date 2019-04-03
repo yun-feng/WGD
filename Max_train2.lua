@@ -81,6 +81,41 @@ feval_Chrom=function(x)
     return f,parGrad_Chrom;
 end
 
+feval_Chrom_wgd=function(x)
+    if x~=par_Chrom then
+        par_Chrom:copy(x)
+    end
+
+
+    Chrom_Model:zeroGradParameters();
+    for i = 1,15 do--#Chrom_Model.modules do
+        if string.find(tostring(Chrom_Model.modules[i]), 'SpatialConvolution') then
+                Chrom_Model.modules[i].weight:renorm(2,1,opt.KernelMax)
+        end
+    end
+
+
+        local grad=torch.zeros(Chrom_Model.output:size())
+	temp_value=torch.zeros(train.ChrA:size())
+        for i= 1,grad:size(1) do
+		 temp_value[i]=Chrom_Model.output[i][train.ChrA[i]]-train.Advantage2[i]-math.log(WGD)
+	end
+	 Chrom_Model:forward(train.state*2)
+
+	for i= 1,grad:size(1) do
+
+              local     temp=Chrom_Model.output[i]-temp_value[i]
+                temp=-nn.ReLU():forward(-temp)
+                grad[i]=temp/(train.Advantage:size(1))
+        end
+
+    Chrom_Model:backward(train.state*2,grad);
+
+    return temp_value,parGrad_Chrom;
+end
+
+
+
 par_CNV,parGrad_CNV=CNV_Model:getParameters()
 
 feval_CNV=function(x)
@@ -169,6 +204,8 @@ end
 
 function model_train()
 	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
+	 local temp,losses=opt.Method(feval_Chrom_wgd,par_Chrom,opt.State_Chrom);
+
 	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
 	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 end

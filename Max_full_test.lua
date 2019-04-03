@@ -13,9 +13,9 @@ batch_sample=10
 --dofile (wkdir.."train.lua");
 --dofile (wkdir.."data.lua");
 
-Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com3");
-CNV_Model=torch.load(wkdir.."Model_CNV_Model_com3");
-End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_com3");
+Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com");
+CNV_Model=torch.load(wkdir.."Model_CNV_Model_com");
+End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_com");
 
 dofile (wkdir.."Advantage2.lua");
 dofile (wkdir.."train2.lua");
