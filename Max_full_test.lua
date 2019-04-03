@@ -7,11 +7,8 @@ opt={}
 train={}
 test={}
 
-dofile (wkdir.."Policy2.lua");
-batch_sample=10
---dofile (wkdir.."Advantage.lua");
---dofile (wkdir.."train.lua");
---dofile (wkdir.."data.lua");
+dofile (wkdir.."Policy2_nl2.lua");
+
 
 Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com");
 CNV_Model=torch.load(wkdir.."Model_CNV_Model_com");
