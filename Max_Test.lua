@@ -27,7 +27,7 @@ Chrom_Model.output
 
 LoadData(1)
 
-Chrom_Model:forward(train.state)
+Chrom_Model:forward(train.state_cal)
 
 a,b=Chrom_Model.output:min(2)
 x=torch.Tensor(batch_sample)

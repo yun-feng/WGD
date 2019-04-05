@@ -14,20 +14,21 @@ nkernels = {160,240,480,960,22*2}
 --determin which chromosome to change
 Chrom_Net = nn.Sequential()
 
-Chrom_Net:add(nn.AddConstant(-1))
-Chrom_Net:add(nn.Reshape(1,2*1100,1))
-Chrom_Net:add(nn.Reshape(1,44,50))
+--Chrom_Net:add(nn.AddConstant(-1))
+Chrom_Net:add(nn.Reshape(1,2*1100,2))
+Chrom_Net:add(nn.Transpose({3,4}))
+Chrom_Net:add(nn.Reshape(1,2,44,50))
 
 Chrom_Net:add(nn.Replicate(2))
 Chrom_Net:add(nn.SplitTable(1))
 h0=nn.ParallelTable()
-h0:add(nn.Sequential():add(nn.Sum(3)):add(nn.Replicate(44,3)))
+h0:add(nn.Sequential():add(nn.Sum(4)):add(nn.Replicate(44,4)))
 h0:add(nn.Sequential():add(nn.Identity()))
 Chrom_Net:add(h0)
 
-Chrom_Net:add(nn.JoinTable(1,3))
-
-Chrom_Net:add(nn.SpatialConvolution(nfeats, nkernels[1]/2, 7, 1, 1, 1, 3,0))
+Chrom_Net:add(nn.JoinTable(2,4))
+Chrom_Net:add(nn.Reshape(4,44,50))
+Chrom_Net:add(nn.SpatialConvolution(nfeats*2, nkernels[1]/2, 7, 1, 1, 1, 3,0))
 Chrom_Net:add(nn.Threshold(0, 1e-6))
 Chrom_Net:add(nn.SpatialMaxPooling(3,1,3,1,1,0))
 --Chrom_Net:add(nn.Dropout(0.2))
@@ -62,6 +63,8 @@ Chrom_Net:add(nn.CMulTable())
 Chrom_Net:add(nn.Sum(2))
 
 Chrom_Model=Chrom_Net;
+
+--Chrom_Model_old=Chrom_Model:clone()
 
 --determine the starting position and type of CNV
 CNV_i1 =-nn.SpatialConvolution(nfeats,nkernels[1]/2, 1, 5, 1, 7, 0,3)

@@ -32,7 +32,8 @@ opt.State_Chrom = {
 }
 
 opt.State_CNV=deepcopy(opt.State_Chrom)
-
+--opt.State_Chrom_old=deepcopy(opt.State_Chrom)
+--opt.State_Chrom_old.learningRate=1e-3
 opt.State_CNV.learningRate=1e-4
 opt.State_End=deepcopy(opt.State_CNV)
 --opt.State_End.learningRate=2e-6
@@ -50,7 +51,7 @@ feval_Chrom=function(x)
     
     
     Chrom_Model:zeroGradParameters();
-    Chrom_Model:forward(train.state)
+    Chrom_Model:forward(train.state_cal)
 	--normalization for kernal 
     for i = 1,15 do--#Chrom_Model.modules do
         if string.find(tostring(Chrom_Model.modules[i]), 'SpatialConvolution') then
@@ -71,15 +72,38 @@ feval_Chrom=function(x)
 		end
 
 	      local	temp=Chrom_Model.output[i]-(Chrom_Model.output[i][train.ChrA[i]]-train.Advantage2[i])
-		temp=torch.cmul(nn.ReLU():forward(temp),temp_chr)-torch.cmul(nn.ReLU():forward(-temp),(1-temp_chr))
+		temp=torch.cmul(nn.ReLU():forward(temp),temp_chr)-torch.cmul(nn.ReLU():forward(-temp-math.log(single_loci_loss)),(1-temp_chr))
 		grad[i]=grad[i]+temp/(train.Advantage:size(1))
 	end
 	end
 	
-    Chrom_Model:backward(train.state,grad);
+    Chrom_Model:backward(train.state_cal,grad);
 
     return f,parGrad_Chrom;
 end
+
+--par_Chrom_old,parGrad_Chrom_old=Chrom_Model_old:getParameters();
+
+feval_Chrom_old=function(x)
+    if x~=par_Chrom_old then
+        par_Chrom_old:copy(x)
+    end
+
+
+    Chrom_Model_old:zeroGradParameters();
+    for i = 1,15 do--#Chrom_Model.modules do
+        if string.find(tostring(Chrom_Model_old.modules[i]), 'SpatialConvolution') then
+                Chrom_Model_old.modules[i].weight:renorm(2,1,opt.KernelMax)
+        end
+    end
+
+    parGrad_Chrom_old=par_Chrom_old-par_Chrom
+
+
+    return torch.sum(torch.pow(par_Chrom_old-par_Chrom,2)),parGrad_Chrom_old;
+end
+
+
 
 feval_Chrom_wgd=function(x)
     if x~=par_Chrom then
@@ -97,9 +121,10 @@ feval_Chrom_wgd=function(x)
 
         local grad=torch.zeros(Chrom_Model.output:size())
 	temp_value=torch.zeros(train.ChrA:size())
-        for i= 1,grad:size(1) do
-		 temp_value[i]=Chrom_Model.output[i][train.ChrA[i]]-train.Advantage2[i]-math.log(WGD)
-	end
+	temp_value=-train.max_next-math.log(WGD)
+        --for i= 1,grad:size(1) do
+	--	 temp_value[i]=Chrom_Model.output[i][train.ChrA[i]]-train.Advantage2[i]-math.log(WGD)
+	--end
 	 Chrom_Model:forward(train.state*2)
 
 	for i= 1,grad:size(1) do
@@ -204,7 +229,7 @@ end
 
 function model_train()
 	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
-	 local temp,losses=opt.Method(feval_Chrom_wgd,par_Chrom,opt.State_Chrom);
+--	 local temp,losses=opt.Method(feval_Chrom_old,par_Chrom_old,opt.State_Chrom_old);
 
 	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
 	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);

@@ -24,7 +24,7 @@ end
 
 WGD_LOSS=function(cnp,time)
 	local reward_next;
-	reward_next=-Chrom_Model:forward(cnp):min()
+	reward_next=-Chrom_Model:forward(nn.JoinTable(3,3):forward({cnp,cnp-2*torch.floor(cnp/2)})):min()
 	if(reward_next< torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)) then
 		reward_next=torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)
 	end
@@ -40,7 +40,7 @@ WGD_LOSS=function(cnp,time)
 end	
 
 Advantage_cal=function()
-	Chrom_Model:forward(train.next)
+	Chrom_Model:forward(train.next_cal)
 	train.Advantage=train.Advantage+train.Reward:clone()
 
 	train.max_next=-Chrom_Model.output:min(2):resize(train.Reward:size())
@@ -61,7 +61,7 @@ Advantage_cal=function()
 				
 	train.Advantage=train.Advantage+torch.cmul(train.max_next,train.valid);
 	
-	Chrom_Model:forward(train.state)	
+	Chrom_Model:forward(train.state_cal)	
 	
 	CNV_Model:forward({train.state,train.chrom_state})
 	
@@ -139,7 +139,7 @@ Advantage_cal=function()
 		
 	end
 	
-	Chrom_Model:forward(train.next)
+	Chrom_Model:forward(train.next_cal)
 	
 	train.max_next=-Chrom_Model.output:min(2):resize(train.Reward:size())
 	for i=1,train.state:size(1) do
