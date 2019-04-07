@@ -24,7 +24,7 @@ end
 
 WGD_LOSS=function(cnp,time)
 	local reward_next;
-	reward_next=-Chrom_Model:forward(nn.JoinTable(3,3):forward({cnp,cnp-2*torch.floor(cnp/2)})):min()
+	reward_next=-Chrom_Model:forward((nn.JoinTable(3,3):forward({cnp-1,cnp-2*torch.floor(cnp/2)-1}):resize(1,2,1100,2))):min()
 	if(reward_next< torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)) then
 		reward_next=torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)
 	end
