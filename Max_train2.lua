@@ -72,7 +72,7 @@ feval_Chrom=function(x)
 		end
 
 	      local	temp=Chrom_Model.output[i]-(Chrom_Model.output[i][train.ChrA[i]]-train.Advantage2[i])
-		temp=torch.cmul(nn.ReLU():forward(temp),temp_chr)-torch.cmul(nn.ReLU():forward(-temp-math.log(single_loci_loss)),(1-temp_chr))
+		temp=torch.cmul(nn.ReLU():forward(temp),temp_chr)-torch.cmul(nn.ReLU():forward(-temp-temp_chr[train.ChrA[i]]*math.log(single_loci_loss)),(1-temp_chr))
 		grad[i]=grad[i]+temp/(train.Advantage:size(1))
 	end
 	end

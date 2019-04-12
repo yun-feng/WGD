@@ -22,7 +22,7 @@ Chrom_Net:add(nn.Reshape(1,2,44,50))
 Chrom_Net:add(nn.Replicate(2))
 Chrom_Net:add(nn.SplitTable(1))
 h0=nn.ParallelTable()
-h0:add(nn.Sequential():add(nn.Sum(4)):add(nn.Replicate(44,4)))
+h0:add(nn.Sequential():add(nn.Mean(4)):add(nn.Replicate(44,4)))
 h0:add(nn.Sequential():add(nn.Identity()))
 Chrom_Net:add(h0)
 
@@ -49,17 +49,19 @@ Chrom_Net:add(nn.Threshold())
 
 Chrom_Net:add(nn.Replicate(2))
 Chrom_Net:add(nn.SplitTable(1))
-p0=nn.ParallelTable()
-p0:add(nn.Sequential():add(nn.SpatialConvolution(nkernels[4]/2, 5, 4, 1, 1, 1, 0,0)):add(nn.Sum(3,4)):add(nn.Sigmoid()):add(nn.Replicate(44,3)):add(nn.Reshape(5,44)))
+--p0=nn.ParallelTable()
+--p0:add(nn.Sequential():add(nn.SpatialConvolution(nkernels[4]/2, 5, 4, 1, 1, 1, 0,0)):add(nn.Sum(3,4)):add(nn.Sigmoid()):add(nn.Replicate(44,3)):add(nn.Reshape(5,44)))
 
 p1=nn.ParallelTable()
                                                                      
 p1:add(nn.Sequential():add(nn.SpatialConvolution(nkernels[4]/2, 5, 4, 1, 1, 1, 0,0)):add(nn.Reshape(5,44)))
 p1:add(nn.Sequential():add(nn.SpatialConvolution(nkernels[4]/2, 5, 4, 1, 1, 1, 0,0)):add(nn.Sum(3,4)):add(nn.Replicate(44,3)):add(nn.Reshape(5,44)))
 
-p0:add(nn.Sequential():add(nn.Replicate(2)):add(nn.SplitTable(1)):add(p1):add(nn.CAddTable()):add(nn.ELU()))
-Chrom_Net:add(p0)
-Chrom_Net:add(nn.CMulTable())
+--p0:add(nn.Sequential():add(nn.Replicate(2)):add(nn.SplitTable(1)):add(p1):add(nn.CAddTable()):add(nn.ELU()))
+Chrom_Net:add(p1)
+Chrom_Net:add(nn.CAddTable())
+Chrom_Net:add(nn.ELU())
+--Chrom_Net:add(nn.CMulTable())
 Chrom_Net:add(nn.Sum(2))
 
 Chrom_Model=Chrom_Net;
@@ -78,13 +80,13 @@ CNV_Net={CNV_h1,CNV_h2}-nn.JoinTable(1,3)
 
 CNV_Net =CNV_Net-nn.SpatialConvolution(nkernels[1], nkernels[2]/2, 1, 8, 1, 1, 0,3)
 CNV_Net =CNV_Net-nn.Threshold(0, 1e-6)
-CNV_Net =CNV_Net-nn.SpatialMaxPooling(1,4,1,4,0,2)
+--CNV_Net =CNV_Net-nn.SpatialMaxPooling(1,4,1,4,0,2)
 
 
 CNV_Net =CNV_Net-nn.SpatialConvolution(nkernels[2]/2, nkernels[3]/2, 1, 8, 1, 1, 0,3)
 CNV_Net =CNV_Net-nn.Threshold(0, 1e-6)
 
-nchannel = math.floor((50)/4)
+nchannel = math.floor((50)/1)
 CNV_Net =CNV_Net-nn.Reshape(nkernels[3]/2*nchannel)
 CNV_Net =CNV_Net-nn.Linear(nkernels[3]/2*nchannel,2*chrom_width-1)
 --CNV_Net =CNV_Net-nn.SoftMax();

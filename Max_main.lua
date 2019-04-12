@@ -38,17 +38,17 @@ for c=0,cycle do
     print("Start train");
 	split_train=1;
 	temp_Advantage=train.Advantage2:clone();
---	while(torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1)) > 6) do
---		split_train=split_train+1;
---		train.Advantage2=temp_Advantage/split_train
---	end
---	temp_split=split_train
---	while (split_train>0.5) do
---		model_train();
---		Advantage_cal()
---		train.Advantage2=train.Advantage2/temp_split
---		split_train=split_train-1;
---	end
+	while(torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1)) > 6) do
+		split_train=split_train+1;
+		train.Advantage2=temp_Advantage/split_train
+	end
+	temp_split=split_train
+	while (split_train>0.5) do
+		model_train();
+		Advantage_cal()
+		train.Advantage2=train.Advantage2/temp_split
+		split_train=split_train-1;
+	end
 	model_train()
 	Error=torch.log(torch.sum(torch.pow(train.Advantage,2))/train.Advantage:size(1))
     print(string.format("Error: %6.6f",Error));
@@ -62,15 +62,15 @@ for c=0,cycle do
 --	temp_Advantage=train.Advantage2:clone()
 	LoadData_Reverse()
 	        split_train=0;
---        while(torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1)) > 6) do
- --               split_train=split_train+1;
- --               train.Advantage2=train.Advantage2/2
- --       end
---        while (split_train>0.5) do
---                model_train();
---                split_train=split_train-1;
---        end
-	model_train()
+        while(torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1)) > 6) do
+                split_train=split_train+1;
+                train.Advantage2=train.Advantage2/2
+        end
+        while (split_train>0.5) do
+                model_train();
+                split_train=split_train-1;
+        end
+--	model_train()
 	train.state=temp
 	train.valid=temp_valid
 	train.Advantage2=temp_Advantage

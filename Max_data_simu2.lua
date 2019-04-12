@@ -35,7 +35,7 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.98 and 1/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=10) then
+		if(torch.rand(1)[1]>0.15+0.83/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=10) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
@@ -479,7 +479,8 @@ Deconvolute=function(cnp,max_step)
 			test.End:zero()
 			while(current_step<max_step) do
 				current_step=current_step+1
-				Chrom_Model:forward(cnp)
+				cnp_cal=nn.JoinTable(3,3):forward({cnp-1,cnp-torch.floor(cnp/2)*2-1}):resize(1,2,1100,2)
+				Chrom_Model:forward(cnp_cal)
 				local max_reward,max_chr=Chrom_Model.output:min(2)
 				local max_cnv=-1
 				local max_end=0
