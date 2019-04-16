@@ -150,7 +150,7 @@ feval_CNV=function(x)
     
     
     CNV_Model:zeroGradParameters();
-    CNV_Model:forward({train.state,train.chrom_state})
+    CNV_Model:forward({train.state,train.state,train.chrom_state})
 	--normalization for kernal 
     for i = 1,#CNV_Model.modules do
         if string.find(tostring(CNV_Model.modules[i]), 'SpatialConvolution') then
@@ -172,7 +172,7 @@ feval_CNV=function(x)
                 
 		end
     end
-    CNV_Model:backward({train.state,train.chrom_state},grad);
+    CNV_Model:backward({train.state,train.state,train.chrom_state},grad);
     return f,parGrad_CNV;
 end
 
