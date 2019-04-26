@@ -24,7 +24,7 @@ LoadData=function(flag)
 		train.valid=torch.ones(batch_sample)
 		train.Advantage2=torch.zeros(batch_sample)
 		train.WGD=torch.zeros(batch_sample)
-		train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1
+	--	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1
 	end
 
 --	if not flag then
@@ -32,7 +32,7 @@ LoadData=function(flag)
 --	end
 		
 		
-	--train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1;
+	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1;
 	train.StartL=torch.floor(torch.rand(train.state:size(1))*chrom_width)+1
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
@@ -43,7 +43,7 @@ LoadData=function(flag)
 			train.Advantage[i]=0
 			train.step[i]=0
 			train.WGD[i]=0
-			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
+	--		train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
 		else
 			if((train.valid[i]>0) and ( torch.abs(train.Advantage2[i])<3)) then
 				train.next[i]=train.state[i]:clone()
@@ -59,9 +59,9 @@ LoadData=function(flag)
 			train.StartL[i]=1
 			train.End[i]=chrom_width
 		end
-		if(torch.rand(1)[1]>0.5) then
-			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
-		end
+--		if(torch.rand(1)[1]>0.5) then
+--			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
+--		end
 	--	if((not flag) and torch.rand(1)[1]>0.7) then
 	--		temp,train.ChrA[i]=Chrom_Model.output[torch.floor(torch.rand(1)[1]*train.state:size(1))+1]:min(1)
 	--	end
@@ -71,7 +71,7 @@ LoadData=function(flag)
 	--train.cnv=(torch.floor(torch.rand(train.state:size(1))*2))
 	train.cnv=torch.zeros(train.state:size(1))
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.7) then
+		if(torch.rand(1)[1]>0.6) then
 			train.cnv[i]=1
 		end
 	end
@@ -191,7 +191,7 @@ LoadData_Reverse=function()
 		
 
 	for i=1,train.ChrA:size(1) do
-		if temp_Advantage[i]>6 then
+		if temp_Advantage2[i]>6 then
 			train.valid[i]=0
 		end
 		if (torch.rand(1)[1]>0.9 and train.state[i]:sum()<2200*4) then
@@ -518,7 +518,7 @@ Deconvolute=function(cnp,max_step)
 					
 					
 					
-					CNV_Model:forward({cnp,cnp,chrom_state})
+					CNV_Model:forward({torch.floor(cnp:mean(2):mean(1):expand(1,50,1)+0.5),chrom_state})
 					
 					temp_max=CNV_Model.output[temp_start_loci[1][2]*2-1]
 					max_cnv=temp_start_loci[1][2]*2-1
@@ -571,6 +571,8 @@ Deconvolute=function(cnp,max_step)
 											temp_max=End_Point_Model.output[temp_end_loci[j][1]-1]
 											max_end=temp_end_loci[j][1]
 							end
+						elseif (temp_action<0 and chrom_state[1][temp_end_loci[j][1]][1]-1<-0.5) then
+							break
 						end
 					end
 					

@@ -63,7 +63,7 @@ Advantage_cal=function()
 	
 	Chrom_Model:forward(train.state_cal)	
 	
-	CNV_Model:forward({train.state,train.state,train.chrom_state})
+	CNV_Model:forward({torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state})
 	
 	for i = 1,train.state:size(1) do
 
