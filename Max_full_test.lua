@@ -18,7 +18,7 @@ dofile (wkdir.."Advantage2.lua");
 dofile (wkdir.."train2.lua");
 dofile (wkdir.."data_simu2.lua");
 
-train.step_sample=10
+train.step_sample=20
 
 train.Chr_sample=torch.zeros(batch_sample,train.step_sample)
 train.CNV_sample=torch.zeros(batch_sample,train.step_sample)

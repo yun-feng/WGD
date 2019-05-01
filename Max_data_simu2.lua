@@ -416,11 +416,11 @@ LoadData_t=function(step)
 			train.cnv=torch.zeros(train.state:size(1))
 			
 			for i=1,train.ChrA:size(1) do
-				if(torch.rand(1)[1]>0.7) then
+				if(torch.rand(1)[1]>0.6) then
                         train.StartL[i]=1
                         train.End[i]=chrom_width
                 end
-                if(torch.rand(1)[1]>0.7) then
+                if(torch.rand(1)[1]>0.6) then
                         train.cnv[i]=1
                 end
 			end
@@ -479,6 +479,11 @@ LoadData_t=function(step)
 end
 
 Deconvolute=function(cnp,max_step)
+			flag_chr=0
+			flag_cnv=0
+			flag_end=0
+			rec_flag=false
+
 			current_step=0
 			test.ChrA:zero()
 			test.CNV:zero()
@@ -522,12 +527,13 @@ Deconvolute=function(cnp,max_step)
 					
 					temp_max=CNV_Model.output[temp_start_loci[1][2]*2-1]
 					max_cnv=temp_start_loci[1][2]*2-1
+					
 					for j=1,temp_start_loci:size(1) do
 						if(CNV_Model.output[temp_start_loci[j][2]*2-1] > temp_max) then
 							temp_max=CNV_Model.output[temp_start_loci[j][2]*2-1]
 							max_cnv=temp_start_loci[j][2]*2-1
 						end
-						if (chrom_state[1][temp_start_loci[j][2]][1]-1>-0.5) then
+						if (chrom_state[1][temp_start_loci[j][2]][1]-1>-0.5 and not (rec_flag and flag_cnv==temp_start_loci[j][2]*2-1-1)) then
 							if  (temp_start_loci[j][2]*2-1>2) and (CNV_Model.output[temp_start_loci[j][2]*2-1-1]>temp_max) then
 									temp_max=CNV_Model.output[temp_start_loci[j][2]*2-1-1]
 									max_cnv=temp_start_loci[j][2]*2-1-1
@@ -590,7 +596,16 @@ Deconvolute=function(cnp,max_step)
 				test.ChrA[current_step]=max_chr
 				test.CNV[current_step]=max_cnv+1
 				test.End[current_step]=max_end
-			
+					if(max_cnv%2==1 and flag_chr==max_chr and flag_cnv==max_cnv and flag_end==max_end) then
+						rec_flag=true
+						flag_cnv=2*torch.floor(max_cnv/2)
+					else
+						rec_flag=false
+						flag_chr=max_chr
+						flag_cnv=(1-max_cnv%2)+2*torch.floor(max_cnv/2)
+						flag_end=max_end
+					end
+				
 			end
 end
 
