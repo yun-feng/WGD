@@ -222,7 +222,7 @@ feval_End=function(x)
 		end
     end
 	
-    End_Point_Model:backward({train.chrom_state,train.chrom_state_new,train.state},grad);
+    End_Point_Model:backward({train.chrom_state,train.chrom_state_new,torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5)},grad);
     
     return f,parGrad_End;
 end

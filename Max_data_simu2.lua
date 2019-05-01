@@ -24,7 +24,7 @@ LoadData=function(flag)
 		train.valid=torch.ones(batch_sample)
 		train.Advantage2=torch.zeros(batch_sample)
 		train.WGD=torch.zeros(batch_sample)
-	--	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1
+		train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1
 	end
 
 --	if not flag then
@@ -32,7 +32,7 @@ LoadData=function(flag)
 --	end
 		
 		
-	train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1;
+	--train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1;
 	train.StartL=torch.floor(torch.rand(train.state:size(1))*chrom_width)+1
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
@@ -43,7 +43,7 @@ LoadData=function(flag)
 			train.Advantage[i]=0
 			train.step[i]=0
 			train.WGD[i]=0
-	--		train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
+			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
 		else
 			if((train.valid[i]>0) and ( torch.abs(train.Advantage2[i])<3)) then
 				train.next[i]=train.state[i]:clone()
@@ -55,13 +55,13 @@ LoadData=function(flag)
 			end
 	
 		end
-		if(torch.rand(1)[1]>0.7) then
+		if(torch.rand(1)[1]>0.8) then
 			train.StartL[i]=1
 			train.End[i]=chrom_width
 		end
---		if(torch.rand(1)[1]>0.5) then
---			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
---		end
+		if(torch.rand(1)[1]>0.8) then
+			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
+		end
 	--	if((not flag) and torch.rand(1)[1]>0.7) then
 	--		temp,train.ChrA[i]=Chrom_Model.output[torch.floor(torch.rand(1)[1]*train.state:size(1))+1]:min(1)
 	--	end
@@ -71,7 +71,7 @@ LoadData=function(flag)
 	--train.cnv=(torch.floor(torch.rand(train.state:size(1))*2))
 	train.cnv=torch.zeros(train.state:size(1))
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.6) then
+		if(torch.rand(1)[1]>0.5) then
 			train.cnv[i]=1
 		end
 	end
@@ -86,7 +86,7 @@ LoadData=function(flag)
 		
 
 	for i=1,train.ChrA:size(1) do
-		if (torch.abs(train.Advantage2[i])<100 and torch.rand(1)[1]<0.1/(1+math.exp(-train.step[i]+math.min(5,5+torch.sum(train.step)/batch_sample))) and train.WGD[i]<3) then
+		if (torch.abs(train.Advantage2[i])<100 and torch.rand(1)[1]<0.2/(1+math.exp(-train.step[i]+math.min(5,5+torch.sum(train.step)/batch_sample))) and train.WGD[i]<1) then
 			train.state[i]=train.state[i]*2
 			train.next[i]=train.next[i]*2
 			train.WGD[i]=1
@@ -549,7 +549,7 @@ Deconvolute=function(cnp,max_step)
 					for j=temp_start,chrom_width do
 						chrom_state_new[1][j][1]=chrom_state_new[1][j][1]+temp_action
 					end
-					End_Point_Model:forward({chrom_state,chrom_state_new,cnp})
+					End_Point_Model:forward({chrom_state,chrom_state_new,torch.floor(cnp:mean(2):mean(1):expand(1,50,1)+0.5)})
 					
 					temp_end=torch.zeros(chrom_width,1)-1
 					temp_copy=chrom_state[1]
