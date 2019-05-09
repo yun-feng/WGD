@@ -4,18 +4,12 @@ require "math"
 
 batch_sample=15
 chrom_extract=function(cnp,chrom,allele)
-	--if chrom<=1 then
-	--	return torch.zeros(1,chrom_width,1);
-	--else
 		return cnp[{{allele,allele},{chrom_width*(chrom-1-allele*22+22)+1,chrom_width*(chrom-allele*22+22)},{}}];
---	end
 end
 
 CNV_action=torch.Tensor({{1,0},{-1,0},{0,1},{0,-1}})
 
 LoadData=function(flag)
-	--when flag is true, load data from file
-	--otherwise use the next state as input
 	if flag then
 		train.state=torch.ones(batch_sample,2,1100,1)
         	train.next=torch.ones(batch_sample,2,1100,1)
@@ -24,15 +18,9 @@ LoadData=function(flag)
 		train.valid=torch.ones(batch_sample)
 		train.Advantage2=torch.zeros(batch_sample)
 		train.WGD=torch.zeros(batch_sample)
-		train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1
+		train.ChrA=torch.ones(batch_sample)
 	end
 
---	if not flag then
---		train.next=train.state:clone()
---	end
-		
-		
-	--train.ChrA=torch.floor(torch.rand(train.state:size(1))*(22*2))+1;
 	train.StartL=torch.floor(torch.rand(train.state:size(1))*chrom_width)+1
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
@@ -43,7 +31,6 @@ LoadData=function(flag)
 			train.Advantage[i]=0
 			train.step[i]=0
 			train.WGD[i]=0
-			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
 		else
 			if((train.valid[i]>0) and ( torch.abs(train.Advantage2[i])<3)) then
 				train.next[i]=train.state[i]:clone()
@@ -59,12 +46,9 @@ LoadData=function(flag)
 			train.StartL[i]=1
 			train.End[i]=chrom_width
 		end
-		if(torch.rand(1)[1]>0.8) then
-			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
-		end
-	--	if((not flag) and torch.rand(1)[1]>0.7) then
-	--		temp,train.ChrA[i]=Chrom_Model.output[torch.floor(torch.rand(1)[1]*train.state:size(1))+1]:min(1)
-	--	end
+--		if(torch.rand(1)[1]>0.8) then
+--			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
+--		end
 	end
 	
 	train.allele=torch.floor((train.ChrA-1)/22)+1
@@ -149,11 +133,16 @@ LoadData=function(flag)
 	for i=1,train.Reward:size(1) do
 		if train.valid[i]>0 then
 			train.Reward[i]=Reward(train.ChrA[i],train.StartL[i],train.End[i],train.state[i],train.next[i])
-			if((torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
-				train.WGD_flag[i]=1
-			end
+--			if((torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
+--				train.WGD_flag[i]=1
+--			end
 		end
 	end
+
+	train.chr_state=torch.gt(torch.abs(train.state:resize(batch_sample,44,50)-1):sum(3):resize(batch_sample,44),1)	
+	train.chr_state_wgd=torch.gt(torch.abs(train.state-2*torch.floor(train.state/2)):resize(batch_sample,44,50):sum(3):resize(batch_sample,44),1)
+	train.chr_next=torch.gt(torch.abs(train.next:resize(batch_sample,44,50)-1):sum(3):resize(batch_sample,44),1)
+        train.chr_next_wgd=torch.gt(torch.abs(train.next-2*torch.floor(train.next/2)):resize(batch_sample,44,50):sum(3):resize(batch_sample,44),1)
 	
 		
 	--train.Advantage=torch.Tensor(train.state:size(1));
@@ -163,7 +152,7 @@ LoadData=function(flag)
 	--train.max_end_new=torch.zeros(train.Advantage:size(1)) 
 	train.Advantage2=torch.zeros(train.Advantage:size())
 	--train.chrom_state_new2=train.chrom_state:clone()
-	train.state_cal=nn.JoinTable(3,3):forward({train.state-1,train.state-2*torch.floor(train.state/2)-1})
+--	train.state_cal=nn.JoinTable(3,3):forward({train.state-1,train.state-2*torch.floor(train.state/2)-1})
 	 train.next_cal=nn.JoinTable(3,3):forward({train.next-1,train.next-2*torch.floor(train.next/2)-1})
 	Advantage_cal();
 	--train.Advantage=torch.cmul(train.Advantage,train.valid)

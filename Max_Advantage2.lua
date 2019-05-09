@@ -5,10 +5,10 @@ require "math"
 normal_const=5e-5;
 single_loci_loss=normal_const*(1-2e-1);
 Half_Chromosome_CNV=normal_const*(1-0.4);
-Whole_Chromosome_CNV=normal_const*(1-0.5);
+Whole_Chromosome_CNV=normal_const*0.99/10;
 WGD=normal_const*0.6;
 const1=normal_const*(1-1e-1);
-const2=5;
+const2=2;
 
 Reward=function(ChrA,StartL,EndL,StartS,EndS)
 	local reward;
@@ -18,6 +18,10 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 			if torch.abs(EndL-StartL+1-chrom_width)<1 then
 				reward=math.log(Whole_Chromosome_CNV);
 			end
+
+	--		if (StartS==0 and torch.abs(EndS-25.5)<1) or (EndS==50 and torch.abs(StartS-25.5)<1) then
+	--			reward=math.log(1.3*Whole_Chromosome_CNV);	
+	--		end
 		
 	return reward;
 end
