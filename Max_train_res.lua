@@ -4,7 +4,7 @@ require "math"
 
 require "optim"
 
-
+opt.KernelMax1=0.09
 opt.KernelMax=0.9
 
 function deepcopy(orig)
@@ -23,11 +23,11 @@ function deepcopy(orig)
 end
 
 opt.State_Chrom = {
-   learningRate=1e-4,
+   learningRate=5e-5,
    learningRateDecay=1e-7,
    weightDecay=1e-6,
-   beta1=0.9,
-   beta2=0.99,
+   beta1=0.5,
+   beta2=0.5,
    epsilon=1e-8
 }
 
@@ -38,6 +38,19 @@ opt.State_CNV.learningRate=1e-4
 opt.State_End=deepcopy(opt.State_CNV)
 --opt.State_End.learningRate=2e-6
 --opt.State_Val.learningRate=0.001
+
+opt.State_Chrom_nag = {
+   learningRate=1e-4,
+   learningRateDecay=1e-7,
+   weightDecay=1e-6,
+momentum=0.9
+}
+--opt.State_CNV=deepcopy(opt.State_Chrom)
+--opt.State_Chrom_old=deepcopy(opt.State_Chrom)
+----opt.State_Chrom_old.learningRate=1e-3
+--opt.State_CNV.learningRate=1e-4
+--opt.State_End=deepcopy(opt.State_CNV)
+
 
 opt.Method = optim.adam;
 
@@ -51,13 +64,14 @@ feval_Chrom=function(x)
     
     
     Chrom_Model:zeroGradParameters();
-    Chrom_Model:forward(train.state_cal)
+    Chrom_Model:forward(Chrom_input(train.state))
 	--normalization for kernal 
-  for i = 1,15 do--#Chrom_Model.modules do
-        if string.find(tostring(Chrom_Model.modules[i]), 'SpatialConvolution') then
-                Chrom_Model.modules[i].weight:renorm(2,1,opt.KernelMax)
+    for i = 1,13 do--#Chrom_Model.modules do
+        if string.find(tostring( Chrom_WGD_res.modules[3].modules[2].modules[i]), 'SpatialConvolution') then
+                 Chrom_WGD_res.modules[3].modules[2].modules[i].weight:renorm(2,1,opt.KernelMax1)
         end
     end
+        Chrom_WGD_res.modules[3].modules[2].modules[13].weight:renorm(2,1,opt.KernelMax1)
 	
     local f=train.Advantage2;
     
@@ -65,19 +79,23 @@ feval_Chrom=function(x)
 	for i= 1,grad:size(1) do
 	if train.valid[i]>0 then
 		grad[i][train.ChrA[i]]=train.Advantage2[i]/(train.Advantage:size(1))
-		if(train.WGD[i]<0.5) then
-			temp_chr=torch.Tensor(44):copy(torch.gt(torch.abs((train.state[i]-1)):resize(2,22,50):sum(3),0.5):resize(44))
-		else
-			temp_chr=torch.Tensor(44):copy(torch.gt(torch.abs((train.state[i]-torch.floor(train.state[i]/2)*2)):resize(2,22,50):sum(3),0.5):resize(44))
-		end
+	--	if(train.WGD[i]<0.5) then
+	--		temp_chr=torch.Tensor(44):copy(torch.gt(torch.abs((train.state[i]-1)):resize(2,22,50):sum(3),0.5):resize(44))
+	--	else
+	--		temp_chr=torch.Tensor(44):copy(torch.gt(torch.abs((train.state[i]-torch.floor(train.state[i]/2)*2)):resize(2,22,50):sum(3),0.5):resize(44))
+	--	end
 
-	      local	temp=Chrom_Model.output[i]-(Chrom_Model.output[i][train.ChrA[i]]-train.Advantage2[i])
-		temp=torch.cmul(nn.ReLU():forward(temp),temp_chr)-torch.cmul(nn.ReLU():forward(-temp-temp_chr[train.ChrA[i]]*math.log(single_loci_loss)),(1-temp_chr))
-		grad[i]=grad[i]+temp/(train.Advantage:size(1))
+	  --    local	temp=Chrom_Model.output[i]-(Chrom_Model.output[i][train.ChrA[i]]-train.Advantage2[i])
+	--	temp=torch.cmul(nn.ReLU():forward(temp),temp_chr)-torch.cmul(nn.ReLU():forward(-temp-temp_chr[train.ChrA[i]]*math.log(single_loci_loss)),(1-temp_chr))
+	--	grad[i]=grad[i]+temp/(train.Advantage:size(1))
 	end
 	end
 	
-    Chrom_Model:backward(train.state_cal,grad);
+    Chrom_Model:backward(Chrom_input(train.state),grad);
+
+	--all Val for noWGD are the same
+
+
 
     return f,parGrad_Chrom;
 end
@@ -228,8 +246,26 @@ feval_End=function(x)
 end
 
 function model_train()
+	old_layer_par=Chrom_Model:get(2):getParameters()
+         old_layer_par= old_layer_par:clone()
+	
+	par_Chrom,parGrad_Chrom=Chrom_Model:getParameters();
+
 	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
---	 local temp,losses=opt.Method(feval_Chrom_old,par_Chrom_old,opt.State_Chrom_old);
+	-- local temp,losses=optim.nag(feval_Chrom,par_Chrom,opt.State_Chrom_nag);
+
+	
+	layer2_par=Chrom_Model:get(2):getParameters()
+        layer10_par=Chrom_Model:get(10):getParameters()
+        layer12_par=Chrom_Model:get(12):getParameters()
+        layer15_par=Chrom_Model:get(15):getParameters()
+        layer17_par=Chrom_Model:get(17):getParameters()
+        ave=(layer2_par+layer10_par+layer12_par+layer15_par+layer17_par)-4*old_layer_par
+         layer2_par:copy(ave)
+         layer10_par:copy(ave)
+         layer12_par:copy(ave)
+         layer15_par:copy(ave)
+         layer17_par:copy(ave)
 
 	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
 	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);

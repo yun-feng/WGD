@@ -9,6 +9,14 @@ end
 
 CNV_action=torch.Tensor({{1,0},{-1,0},{0,1},{0,-1}})
 
+Chrom_input=function(cnp)
+	if(cnp:size():size()==3) then
+		cnp=cnp:clone()
+		cnp=cnp:resize(1,2,1100,1)
+	end
+	return {cnp,cnp,cnp,torch.floor(cnp/2),cnp-2*torch.floor(cnp/2)+torch.ones(cnp:size()),torch.floor((cnp+1)/2),cnp-torch.floor((cnp+1)/2)*2+torch.ones(cnp:size()),torch.DoubleTensor(cnp:size(1),44,1):copy(torch.lt(torch.abs(cnp-1):resize(cnp:size(1),44,50):sum(3):resize(cnp:size(1),44,1),0.9)),torch.DoubleTensor(cnp:size(1),44,1):copy(torch.lt(torch.abs(cnp-torch.floor(cnp/2)*2):resize(cnp:size(1),44,50):sum(3):resize(cnp:size(1),44,1),0.9))} 
+end
+
 LoadData=function(flag)
 	if flag then
 		train.state=torch.ones(batch_sample,2,1100,1)
@@ -25,14 +33,14 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.15+0.83/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=10) then
+		if(torch.rand(1)[1]>0.15+0.83/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=10 or torch.abs(train.Advantage[i])>=10 ) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
 			train.step[i]=0
 			train.WGD[i]=0
 		else
-			if((train.valid[i]>0) and ( torch.abs(train.Advantage2[i])<3)) then
+			if((train.valid[i]>0) and ( torch.abs(train.Advantage2[i])<3) and (torch.abs(train.Advantage[i])<3)) then
 				train.next[i]=train.state[i]:clone()
 				train.step[i]=train.step[i]+1
 				train.Advantage[i]=0--train.Advantage[i]*(1/train.step[i])
@@ -46,9 +54,10 @@ LoadData=function(flag)
 			train.StartL[i]=1
 			train.End[i]=chrom_width
 		end
---		if(torch.rand(1)[1]>0.8) then
---			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
---		end
+		if(torch.rand(1)[1]>0.2) then
+			train.ChrA[i]=torch.floor(torch.rand(1)[1]*(22*2))+1
+			
+		end
 	end
 	
 	train.allele=torch.floor((train.ChrA-1)/22)+1
@@ -133,16 +142,16 @@ LoadData=function(flag)
 	for i=1,train.Reward:size(1) do
 		if train.valid[i]>0 then
 			train.Reward[i]=Reward(train.ChrA[i],train.StartL[i],train.End[i],train.state[i],train.next[i])
---			if((torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
---				train.WGD_flag[i]=1
---			end
+			if((torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
+				train.WGD_flag[i]=1
+			end
 		end
 	end
 
-	train.chr_state=torch.gt(torch.abs(train.state:resize(batch_sample,44,50)-1):sum(3):resize(batch_sample,44),1)	
-	train.chr_state_wgd=torch.gt(torch.abs(train.state-2*torch.floor(train.state/2)):resize(batch_sample,44,50):sum(3):resize(batch_sample,44),1)
-	train.chr_next=torch.gt(torch.abs(train.next:resize(batch_sample,44,50)-1):sum(3):resize(batch_sample,44),1)
-        train.chr_next_wgd=torch.gt(torch.abs(train.next-2*torch.floor(train.next/2)):resize(batch_sample,44,50):sum(3):resize(batch_sample,44),1)
+--	train.chr_state=torch.gt(torch.abs(train.state:resize(batch_sample,44,50)-1):sum(3):resize(batch_sample,44),1)	
+--	train.chr_state_wgd=torch.gt(torch.abs(train.state-2*torch.floor(train.state/2)):resize(batch_sample,44,50):sum(3):resize(batch_sample,44),1)
+--	train.chr_next=torch.gt(torch.abs(train.next:resize(batch_sample,44,50)-1):sum(3):resize(batch_sample,44),1)
+ --       train.chr_next_wgd=torch.gt(torch.abs(train.next-2*torch.floor(train.next/2)):resize(batch_sample,44,50):sum(3):resize(batch_sample,44),1)
 	
 		
 	--train.Advantage=torch.Tensor(train.state:size(1));
@@ -435,10 +444,10 @@ LoadData_t=function(step)
 				end
 				train.valid[i]=1
 			
-                if ((torch.rand(1)[1]<0.1/((1+math.exp(-train.step_sample+step+5))) and train.WGD_sample[i]<0.5) or step==1) then
-                    --    train.state[i]=train.state[i]*2
-                    --    train.next[i]=train.next[i]*2
-                    --    train.WGD_sample[i]=step
+                if ((torch.rand(1)[1]<0.1/((1+math.exp(-train.step_sample+step+5))) and train.WGD_sample[i]<0.5) )then--or step==1) then
+                        train.state[i]=train.state[i]*2
+                        train.next[i]=train.next[i]*2
+                        train.WGD_sample[i]=step
                 end
 
                 for j=train.StartL[i],train.End[i] do
@@ -484,7 +493,7 @@ Deconvolute=function(cnp,max_step)
 			while(current_step<max_step) do
 				current_step=current_step+1
 				cnp_cal=nn.JoinTable(3,3):forward({cnp-1,cnp-torch.floor(cnp/2)*2-1}):resize(1,2,1100,2)
-				Chrom_Model:forward(cnp_cal)
+				Chrom_Model:forward(Chrom_input(cnp))
 				local max_reward,max_chr=Chrom_Model.output:min(2)
 				local max_cnv=-1
 				local max_end=0

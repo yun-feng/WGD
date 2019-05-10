@@ -8,19 +8,19 @@ wkdir="/data/ted/WGD/Max_"
 opt={}
 train={}
 
-dofile (wkdir.."Policy2_nl2.lua");
+dofile (wkdir.."Policy_res.lua");
 batch_sample=10
 --dofile (wkdir.."Advantage.lua");
 --dofile (wkdir.."train.lua");
 --dofile (wkdir.."data.lua");
 
-Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_com");
-CNV_Model=torch.load(wkdir.."Model_CNV_Model_com");
-End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_com");
+Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res");
+CNV_Model=torch.load(wkdir.."Model_CNV_Model_res");
+End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_res");
 
-dofile (wkdir.."Advantage2.lua");
-dofile (wkdir.."train2.lua");
-dofile (wkdir.."data_simu2.lua");
+dofile (wkdir.."Advantage_res.lua");
+dofile (wkdir.."train_res.lua");
+dofile (wkdir.."data_simu_res.lua");
 counter=100000
 
 Chrom_Model.output
