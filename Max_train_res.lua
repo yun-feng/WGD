@@ -23,7 +23,7 @@ function deepcopy(orig)
 end
 
 opt.State_Chrom = {
-   learningRate=5e-5,
+   learningRate=1e-4,
    learningRateDecay=1e-7,
    weightDecay=1e-6,
    beta1=0.5,
@@ -168,13 +168,14 @@ feval_CNV=function(x)
     
     
     CNV_Model:zeroGradParameters();
-    CNV_Model:forward({torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state})
+    CNV_Model:forward(CNV_input(train.chrom_state,train.state))
+--{torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state})
 	--normalization for kernal 
-    for i = 1,#CNV_Model.modules do
-        if string.find(tostring(CNV_Model.modules[i]), 'SpatialConvolution') then
-                CNV_Model.modules[i].weight:renorm(2,1,opt.KernelMax)
-        end
-    end
+    --for i = 1,#CNV_Model.modules do
+    --    if string.find(tostring(CNV_Model.modules[i]), 'SpatialConvolution') then
+     --           CNV_Model.modules[i].weight:renorm(2,1,opt.KernelMax)
+     --   end
+    --end
 	
     local f=train.Advantage;
 	local grad=torch.zeros(CNV_Model.output:size())
@@ -190,7 +191,8 @@ feval_CNV=function(x)
                 
 		end
     end
-    CNV_Model:backward({torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state},grad);
+    CNV_Model:backward(CNV_input(train.chrom_state,train.state),grad)
+--{torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state},grad);
     return f,parGrad_CNV;
 end
 
@@ -246,8 +248,8 @@ feval_End=function(x)
 end
 
 function model_train()
-	old_layer_par=Chrom_Model:get(2):getParameters()
-         old_layer_par= old_layer_par:clone()
+	--old_layer_par=Chrom_Model:get(2):getParameters()
+        -- old_layer_par= old_layer_par:clone()
 	
 	par_Chrom,parGrad_Chrom=Chrom_Model:getParameters();
 
@@ -255,18 +257,44 @@ function model_train()
 	-- local temp,losses=optim.nag(feval_Chrom,par_Chrom,opt.State_Chrom_nag);
 
 	
-	layer2_par=Chrom_Model:get(2):getParameters()
-        layer10_par=Chrom_Model:get(10):getParameters()
-        layer12_par=Chrom_Model:get(12):getParameters()
-        layer15_par=Chrom_Model:get(15):getParameters()
-        layer17_par=Chrom_Model:get(17):getParameters()
-        ave=(layer2_par+layer10_par+layer12_par+layer15_par+layer17_par)-4*old_layer_par
-         layer2_par:copy(ave)
-         layer10_par:copy(ave)
-         layer12_par:copy(ave)
-         layer15_par:copy(ave)
-         layer17_par:copy(ave)
+	--layer2_par=Chrom_Model:get(2):getParameters()
+        --layer11_par=Chrom_Model:get(13):getParameters()
+        --layer13_par=Chrom_Model:get(15):getParameters()
+       -- layer16_par=Chrom_Model:get(18):getParameters()
+        --layer18_par=Chrom_Model:get(20):getParameters()
+        --ave=(layer2_par+layer11_par+layer13_par+layer16_par+layer18_par)-4*old_layer_par
+        -- layer2_par:copy(ave)
+        -- layer11_par:copy(ave)
+        -- layer13_par:copy(ave)
+        -- layer16_par:copy(ave)
+        -- layer18_par:copy(ave)
+
+	par_CNV,parGrad_CNV=CNV_Model:getParameters()
 
 	local temp,losses=opt.Method(feval_CNV,par_CNV,opt.State_CNV);
+	
+	switch_par=Chrom_Model:get(27):getParameters()
+	switch_par_CNV=CNV_Model:get(12):getParameters()
+	ave_switch=(switch_par+switch_par)/2
+	switch_par:copy(ave_switch)
+	switch_par_CNV:copy(ave_switch)
 	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 end
+
+
+function model_train2()
+
+        par_Chrom,parGrad_Chrom=Chrom_Model:getParameters();
+
+        local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
+        
+        par_CNV,parGrad_CNV=CNV_Model:getParameters()
+
+
+        switch_par=Chrom_Model:get(27):getParameters()
+        switch_par_CNV=CNV_Model:get(12):getParameters()
+        ave_switch=(switch_par+switch_par)/2
+        switch_par:copy(ave_switch)
+        switch_par_CNV:copy(ave_switch)
+end
+

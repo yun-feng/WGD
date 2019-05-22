@@ -18,7 +18,7 @@ dofile (wkdir.."Advantage_res.lua");
 dofile (wkdir.."train_res.lua");
 dofile (wkdir.."data_simu_res.lua");
 
-train.step_sample=20
+train.step_sample=50
 Nsample=20
 train.Chr_sample=torch.zeros(Nsample,train.step_sample)
 train.CNV_sample=torch.zeros(Nsample,train.step_sample)
@@ -27,14 +27,14 @@ train.WGD_sample=torch.zeros(Nsample)
 
 LoadData_t(train.step_sample)
 
-test.ChrA=torch.zeros(train.step_sample+10)
-test.CNV=torch.zeros(train.step_sample+10)
-test.End=torch.zeros(train.step_sample+10)
+test.ChrA=torch.zeros(train.step_sample*2)
+test.CNV=torch.zeros(train.step_sample*2)
+test.End=torch.zeros(train.step_sample*2)
 
 
-Deconvolute(train.state[2],train.step_sample+10)
+--Deconvolute(train.state[2],train.step_sample*2)
 
-torch.sum(torch.abs(train.state[2]-1))
+--torch.sum(torch.abs(train.state[2]-1))
 
 Nsample=20
 test.Naive=torch.zeros(Nsample)

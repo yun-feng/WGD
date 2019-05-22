@@ -5,7 +5,7 @@ require "math"
 normal_const=5e-5;
 single_loci_loss=normal_const*(1-2e-1);
 Half_Chromosome_CNV=normal_const*(1-0.4);
-Whole_Chromosome_CNV=normal_const*0.99/2;
+Whole_Chromosome_CNV=normal_const*0.99/10;
 WGD=normal_const*0.6;
 const1=normal_const*(1-1e-1);
 const2=2;
@@ -28,7 +28,9 @@ end
 
 WGD_LOSS=function(cnp,time)
 	local reward_next;
-	reward_next=-Chrom_Model:forward((nn.JoinTable(3,3):forward({cnp-1,cnp-2*torch.floor(cnp/2)-1}):resize(1,2,1100,2))):min()
+	--reward_next=-Chrom_Model:forward((nn.JoinTable(3,3):forward({cnp-1,cnp-2*torch.floor(cnp/2)-1}):resize(1,2,1100,2))):min()
+	reward_next=-Chrom_Model:forward(Chrom_input(cnp)):min()
+--({cnp,cnp,cnp,torch.floot(cnp/2),torch.floor((cnp+1)/2),train.chr_state,train.chr_next})
 	if(reward_next< torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)) then
 		reward_next=torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)
 	end
@@ -44,7 +46,8 @@ WGD_LOSS=function(cnp,time)
 end	
 
 Advantage_cal=function()
-	Chrom_Model:forward(train.next_cal)
+	Chrom_Model:forward(Chrom_input(train.next))
+--{train.next,train.next,train.next,torch.floot(train.next/2),torch.floor((train.next+1)/2),train.chr_state,train.chr_next})
 	train.Advantage=train.Advantage+train.Reward:clone()
 
 	train.max_next=-Chrom_Model.output:min(2):resize(train.Reward:size())
@@ -65,9 +68,10 @@ Advantage_cal=function()
 				
 	train.Advantage=train.Advantage+torch.cmul(train.max_next,train.valid);
 	
-	Chrom_Model:forward(train.state_cal)	
+	Chrom_Model:forward(Chrom_input(train.state))	
 	
-	CNV_Model:forward({torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state})
+	CNV_Model:forward(CNV_input(train.chrom_state,train.state))
+--{torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state})
 	
 	for i = 1,train.state:size(1) do
 
@@ -143,7 +147,7 @@ Advantage_cal=function()
 		
 	end
 	
-	Chrom_Model:forward(train.next_cal)
+	Chrom_Model:forward(Chrom_input(train.next))
 	
 	train.max_next=-Chrom_Model.output:min(2):resize(train.Reward:size())
 	for i=1,train.state:size(1) do

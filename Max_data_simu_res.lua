@@ -14,8 +14,42 @@ Chrom_input=function(cnp)
 		cnp=cnp:clone()
 		cnp=cnp:resize(1,2,1100,1)
 	end
-	return {cnp,cnp,cnp,torch.floor(cnp/2),cnp-2*torch.floor(cnp/2)+torch.ones(cnp:size()),torch.floor((cnp+1)/2),cnp-torch.floor((cnp+1)/2)*2+torch.ones(cnp:size()),torch.DoubleTensor(cnp:size(1),44,1):copy(torch.lt(torch.abs(cnp-1):resize(cnp:size(1),44,50):sum(3):resize(cnp:size(1),44,1),0.9)),torch.DoubleTensor(cnp:size(1),44,1):copy(torch.lt(torch.abs(cnp-torch.floor(cnp/2)*2):resize(cnp:size(1),44,50):sum(3):resize(cnp:size(1),44,1),0.9))} 
+--	return {cnp,cnp,cnp,torch.floor(cnp/2),cnp-2*torch.floor(cnp/2)+torch.ones(cnp:size()),torch.floor((cnp+1)/2),cnp-torch.floor((cnp+1)/2)*2+torch.ones(cnp:size()),torch.DoubleTensor(cnp:size(1),44,1):copy(torch.lt(torch.abs(cnp-1):resize(cnp:size(1),44,50):sum(3):resize(cnp:size(1),44,1),0.9)),torch.DoubleTensor(cnp:size(1),44,1):copy(torch.lt(torch.abs(cnp-torch.floor(cnp/2)*2):resize(cnp:size(1),44,50):sum(3):resize(cnp:size(1),44,1),0.9))} 
+	return {cnp,cnp,cnp,torch.DoubleTensor(cnp:size(1),44,1):copy(torch.lt(torch.abs(cnp-1):resize(cnp:size(1),44,50):sum(3):resize(cnp:size(1),44,1),0.9)),torch.DoubleTensor(cnp:size(1),44,1):copy(torch.lt(torch.abs(cnp-torch.floor(cnp/2)*2):resize(cnp:size(1),44,50):sum(3):resize(cnp:size(1),44,1),0.9)),torch.DoubleTensor(cnp:size(1),44,1):copy(torch.lt(torch.abs(cnp-2):resize(cnp:size(1),44,50):sum(3):resize(cnp:size(1),44,1),0.9))}
+
 end
+
+
+
+CNV_input=function(chrom,cnp)
+	if(cnp:size():size()==3) then
+                cnp=cnp:clone()
+                cnp=cnp:resize(1,2,1100,1)
+		chrom=chrom:clone()
+		chrom=chrom:resize(1,1,50,1)
+        end
+
+	temp=torch.zeros(chrom:size(1),50,2)
+	temp_chrom=torch.ones(chrom:size())
+	temp_chrom[{{1,chrom:size(1)},1,{2,50},1}]:copy(chrom[{{1,chrom:size(1)},1,{1,49},1}])
+	temp:select(3,1):copy(chrom-temp_chrom)
+	temp:select(3,2):copy(-chrom+temp_chrom)
+	temp:resize(chrom:size(1),100)
+	temp=temp-nn.Replicate(100,2):forward(temp:select(2,1))
+	nowgd=torch.zeros(chrom:size(1),99)
+	nowgd:copy(temp[{{1,chrom:size(1)},{2,100}}])
+		
+	temp=torch.zeros(chrom:size(1),50,2)
+        temp:select(3,1):copy(torch.abs(chrom-2*torch.floor(chrom/2)))
+        temp:select(3,2):copy(torch.abs(chrom-2*torch.floor(chrom/2)))
+        temp:resize(chrom:size(1),100)
+        temp=temp-nn.Replicate(100,2):forward(temp:select(2,1))
+        wgd=torch.zeros(chrom:size(1),99)
+        wgd:copy(temp[{{1,chrom:size(1)},{2,100}}])
+	return {chrom,nowgd,wgd,cnp}
+end
+
+
 
 LoadData=function(flag)
 	if flag then
@@ -33,14 +67,14 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.15+0.83/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=10 or torch.abs(train.Advantage[i])>=10 ) then
+		if(torch.rand(1)[1]>0.15+0.83/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=15 or torch.abs(train.Advantage[i])>=10 ) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
 			train.step[i]=0
 			train.WGD[i]=0
 		else
-			if((train.valid[i]>0) and ( torch.abs(train.Advantage2[i])<3) and (torch.abs(train.Advantage[i])<3)) then
+			if((train.valid[i]>0) and ( torch.abs(train.Advantage2[i])<7) and (torch.abs(train.Advantage[i])<7)) then
 				train.next[i]=train.state[i]:clone()
 				train.step[i]=train.step[i]+1
 				train.Advantage[i]=0--train.Advantage[i]*(1/train.step[i])
@@ -79,7 +113,7 @@ LoadData=function(flag)
 		
 
 	for i=1,train.ChrA:size(1) do
-		if (torch.abs(train.Advantage2[i])<100 and torch.rand(1)[1]<0.2/(1+math.exp(-train.step[i]+math.min(5,5+torch.sum(train.step)/batch_sample))) and train.WGD[i]<1) then
+		if (torch.abs(train.Advantage2[i])<100 and torch.rand(1)[1]<0.4/(1+math.exp(-train.step[i]+math.min(5,5+torch.sum(train.step)/batch_sample))) and train.WGD[i]<1) then
 			train.state[i]=train.state[i]*2
 			train.next[i]=train.next[i]*2
 			train.WGD[i]=1
@@ -261,8 +295,8 @@ LoadData_Reverse=function()
 	--train.max_end_new=torch.zeros(train.Advantage:size(1)) 
 	train.Advantage2=torch.zeros(train.Advantage:size())
 	--train.chrom_state_new2=train.chrom_state:clone()
-	 train.state_cal=nn.JoinTable(3,3):forward({train.state-1,train.state-2*torch.floor(train.state/2)-1})
-         train.next_cal=nn.JoinTable(3,3):forward({train.next-1,train.next-2*torch.floor(train.next/2)-1})
+--	 train.state_cal=nn.JoinTable(3,3):forward({train.state-1,train.state-2*torch.floor(train.state/2)-1})
+     --    train.next_cal=nn.JoinTable(3,3):forward({train.next-1,train.next-2*torch.floor(train.next/2)-1})
 	Advantage_cal();
 	--train.Advantage=torch.cmul(train.Advantage,train.valid)
 	train.Advantage2=train.Advantage2
@@ -492,7 +526,7 @@ Deconvolute=function(cnp,max_step)
 			test.End:zero()
 			while(current_step<max_step) do
 				current_step=current_step+1
-				cnp_cal=nn.JoinTable(3,3):forward({cnp-1,cnp-torch.floor(cnp/2)*2-1}):resize(1,2,1100,2)
+			--	cnp_cal=nn.JoinTable(3,3):forward({cnp-1,cnp-torch.floor(cnp/2)*2-1}):resize(1,2,1100,2)
 				Chrom_Model:forward(Chrom_input(cnp))
 				local max_reward,max_chr=Chrom_Model.output:min(2)
 				local max_cnv=-1
@@ -525,20 +559,22 @@ Deconvolute=function(cnp,max_step)
 					
 					
 					
-					CNV_Model:forward({torch.floor(cnp:mean(2):mean(1):expand(1,50,1)+0.5),chrom_state})
+					CNV_Model:forward(CNV_input(chrom_state,cnp))
+					--{torch.floor(cnp:mean(2):mean(1):expand(1,50,1)+0.5),chrom_state})
 					
-					temp_max=CNV_Model.output[temp_start_loci[1][2]*2-1]
+					temp_max=CNV_Model.output[1][temp_start_loci[1][2]*2-1]
+
 					max_cnv=temp_start_loci[1][2]*2-1
 					
 					for j=1,temp_start_loci:size(1) do
 						
-						if(CNV_Model.output[temp_start_loci[j][2]*2-1] > temp_max) then
-							temp_max=CNV_Model.output[temp_start_loci[j][2]*2-1]
+						if(CNV_Model.output[1][temp_start_loci[j][2]*2-1] > temp_max) then
+							temp_max=CNV_Model.output[1][temp_start_loci[j][2]*2-1]
 							max_cnv=temp_start_loci[j][2]*2-1
 						end
 						if (chrom_state[1][temp_start_loci[j][2]][1]-1>-0.5 and not (rec_flag and flag_cnv==temp_start_loci[j][2]*2-1-1)) then
-							if  (temp_start_loci[j][2]*2-1>2) and (CNV_Model.output[temp_start_loci[j][2]*2-1-1]>temp_max) then
-									temp_max=CNV_Model.output[temp_start_loci[j][2]*2-1-1]
+							if  (temp_start_loci[j][2]*2-1>2) and (CNV_Model.output[1][temp_start_loci[j][2]*2-1-1]>temp_max) then
+									temp_max=CNV_Model.output[1][temp_start_loci[j][2]*2-1-1]
 									max_cnv=temp_start_loci[j][2]*2-1-1
 							else
 								if (temp_start_loci[j][2]*2-1<2) and (temp_max<0) then
