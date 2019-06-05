@@ -594,7 +594,7 @@ Deconvolute=function(cnp,max_step)
 					for j=temp_start,chrom_width do
 						chrom_state_new[1][j][1]=chrom_state_new[1][j][1]+temp_action
 					end
-					End_Point_Model:forward({chrom_state,chrom_state_new,torch.floor(cnp:mean(3):mean(2):expand(1,50,1)+0.5)})
+					End_Point_Model:forward({chrom_state:resize(1,1,50,1),chrom_state_new:resize(1,1,50,1),cnp:resize(1,2,1100,1)})
 					
 					temp_end=torch.zeros(chrom_width,1)-1
 					temp_copy=chrom_state[1]
@@ -604,7 +604,7 @@ Deconvolute=function(cnp,max_step)
 					end
 					temp_end_loci=(temp_copy-temp_end):select(2,1):nonzero()
 					if temp_end_loci[1][1]>1 then
-						temp_max=End_Point_Model.output[temp_end_loci[1][1]-1]
+						temp_max=End_Point_Model.output[1][temp_end_loci[1][1]-1]
 						max_end=temp_end_loci[1][1]
 					else
 						temp_max=0
@@ -612,8 +612,8 @@ Deconvolute=function(cnp,max_step)
 					end
 					for j=1,temp_end_loci:size(1) do
 						if(temp_action>0 or chrom_state[1][temp_end_loci[j][1]][1]-1>-0.5) then
-							if (temp_end_loci[j][1] >1) and (End_Point_Model.output[temp_end_loci[j][1]-1]>temp_max) then
-											temp_max=End_Point_Model.output[temp_end_loci[j][1]-1]
+							if (temp_end_loci[j][1] >1) and (End_Point_Model.output[1][temp_end_loci[j][1]-1]>temp_max) then
+											temp_max=End_Point_Model.output[1][temp_end_loci[j][1]-1]
 											max_end=temp_end_loci[j][1]
 							end
 						elseif (temp_action<0 and chrom_state[1][temp_end_loci[j][1]][1]-1<-0.5) then

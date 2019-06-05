@@ -7,16 +7,16 @@ opt={}
 train={}
 test={}
 
-dofile (wkdir.."Policy_res.lua");
+dofile (wkdir.."Policy_res2.lua");
 
 
-Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res3");
-CNV_Model=torch.load(wkdir.."Model_CNV_Model_res_new3");
-End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_res_new3");
+Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res");
+CNV_Model=torch.load(wkdir.."Model_CNV_Model_res");
+End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_res");
 
-dofile (wkdir.."Advantage_res.lua");
-dofile (wkdir.."train_res.lua");
-dofile (wkdir.."data_simu_res.lua");
+dofile (wkdir.."Advantage_res2.lua");
+dofile (wkdir.."train_res2.lua");
+dofile (wkdir.."data_simu_res2.lua");
 
 train.step_sample=50
 Nsample=10
