@@ -209,7 +209,7 @@ Advantage_cal2=function()
                         for j=temp_start,chrom_width do
                                 chrom_state_new2[1][j][1]=chrom_state_new2[1][j][1]+temp_action
                         end
-                        End_Point_Model:forward({train.chrom_state[i]:resize(1,1,50,1),chrom_state_new2:resize(1,1,50,1),train.state[i]:resize(1,2,1100,1)})
+                        End_Point_Model:forward({train.chrom_state[i]:clone():resize(1,1,50,1),chrom_state_new2:clone():resize(1,1,50,1),train.state[i]:clone():resize(1,2,1100,1)})
 
                         temp_end=torch.zeros(chrom_width,1)-1
                         temp_copy=train.chrom_state[i][1]

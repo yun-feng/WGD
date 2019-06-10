@@ -15,7 +15,7 @@ dofile (wkdir.."Policy_res2.lua");
 
 dofile (wkdir.."Advantage_res2.lua");
 dofile (wkdir.."train_res2.lua");
-dofile (wkdir.."data_simu_res.lua");
+dofile (wkdir.."data_simu_res2.lua");
 
 cycle=100000000
 counter=0000;

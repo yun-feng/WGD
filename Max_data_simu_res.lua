@@ -594,7 +594,7 @@ Deconvolute=function(cnp,max_step)
 					for j=temp_start,chrom_width do
 						chrom_state_new[1][j][1]=chrom_state_new[1][j][1]+temp_action
 					end
-					End_Point_Model:forward({chrom_state,chrom_state_new,torch.floor(cnp:mean(3):mean(2):expand(1,50,1)+0.5)})
+					End_Point_Model:forward({chrom_state,chrom_state_new,torch.floor(cnp:mean(2):mean(1):expand(1,50,1)+0.5)})
 					
 					temp_end=torch.zeros(chrom_width,1)-1
 					temp_copy=chrom_state[1]

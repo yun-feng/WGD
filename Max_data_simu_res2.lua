@@ -32,8 +32,8 @@ CNV_input=function(chrom,cnp)
 	temp=torch.zeros(chrom:size(1),50,2)
 	temp_chrom=torch.ones(chrom:size())
 	temp_chrom[{{1,chrom:size(1)},1,{2,50},1}]:copy(chrom[{{1,chrom:size(1)},1,{1,49},1}])
-	temp:select(3,1):copy(chrom-temp_chrom)
-	temp:select(3,2):copy(-chrom+temp_chrom)
+	temp:select(3,1):copy(chrom-1)
+	temp:select(3,2):copy(-chrom+1)
 	temp:resize(chrom:size(1),100)
 	temp=temp-nn.Replicate(100,2):forward(temp:select(2,1))
 	nowgd=torch.zeros(chrom:size(1),99)
@@ -479,9 +479,9 @@ LoadData_t=function(step)
 				train.valid[i]=1
 			
                 if ( train.WGD_sample[i]<0.5 and (torch.rand(1)[1]<0.1/(1+math.exp(-train.step_sample+step+10)) or step==1)) then
-        --               train.state[i]=train.state[i]*2
-          --              train.next[i]=train.next[i]*2
-            --            train.WGD_sample[i]=step
+                       train.state[i]=train.state[i]*2
+                        train.next[i]=train.next[i]*2
+                        train.WGD_sample[i]=step
                 end
 
                 for j=train.StartL[i],train.End[i] do
@@ -594,7 +594,7 @@ Deconvolute=function(cnp,max_step)
 					for j=temp_start,chrom_width do
 						chrom_state_new[1][j][1]=chrom_state_new[1][j][1]+temp_action
 					end
-					End_Point_Model:forward({chrom_state:resize(1,1,50,1),chrom_state_new:resize(1,1,50,1),cnp:resize(1,2,1100,1)})
+					End_Point_Model:forward({chrom_state:clone():resize(1,1,50,1),chrom_state_new:clone():resize(1,1,50,1),cnp:clone():resize(1,2,1100,1)})
 					
 					temp_end=torch.zeros(chrom_width,1)-1
 					temp_copy=chrom_state[1]
