@@ -45,6 +45,24 @@ WGD_LOSS=function(cnp,time)
 	return reward_next+math.log(WGD),time;
 end	
 
+WGD_LOSS_WGD=function(cnp,time)
+        local reward_next;
+        Chrom_Model:forward(Chrom_input(cnp))
+        reward_next=-Chrom_Model:get(11).output:min()
+	if(reward_next< torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)) then
+                reward_next=torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)
+        end
+
+        if (torch.sum(torch.abs(cnp-2*torch.floor(cnp/2))) <1 and torch.sum(cnp)>0) then
+                local temp=WGD_LOSS(torch.floor(cnp/2),time)
+                if (temp> reward_next) then
+                        reward_next=temp
+                        time=time+1
+                end
+        end
+        return reward_next+math.log(WGD),time;
+end
+
 Advantage_cal=function()
 	Chrom_Model:forward(Chrom_input(train.next))
 --{train.next,train.next,train.next,torch.floot(train.next/2),torch.floor((train.next+1)/2),train.chr_state,train.chr_next})

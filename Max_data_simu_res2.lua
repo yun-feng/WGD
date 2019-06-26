@@ -29,13 +29,14 @@ CNV_input=function(chrom,cnp)
 		chrom=chrom:resize(1,1,50,1)
         end
 
-	temp=torch.zeros(chrom:size(1),50,2)
-	temp_chrom=torch.ones(chrom:size())
+	local temp=torch.zeros(chrom:size(1),50,2)
+	local temp_chrom=torch.ones(chrom:size())
 	temp_chrom[{{1,chrom:size(1)},1,{2,50},1}]:copy(chrom[{{1,chrom:size(1)},1,{1,49},1}])
 	temp:select(3,1):copy(chrom-1)
 	temp:select(3,2):copy(-chrom+1)
 	temp:resize(chrom:size(1),100)
 	temp=temp-nn.Replicate(100,2):forward(temp:select(2,1))
+
 	nowgd=torch.zeros(chrom:size(1),99)
 	nowgd:copy(temp[{{1,chrom:size(1)},{2,100}}])
 		
@@ -48,6 +49,38 @@ CNV_input=function(chrom,cnp)
         wgd:copy(temp[{{1,chrom:size(1)},{2,100}}])
 	return {chrom,nowgd,wgd,cnp}
 end
+
+End_input=function(chrom,chrom_new,cnp)
+        if(cnp:size():size()==3) then
+		cnp=cnp:clone()
+                cnp=cnp:resize(1,2,1100,1)
+                chrom=chrom:clone()
+                chrom=chrom:resize(1,1,50,1)
+                chrom_new=chrom_new:clone()
+                chrom_new=chrom_new:resize(1,1,50,1)
+        end
+
+	cnv=(chrom_new-chrom):select(3,50)[{{1,chrom:size(1)},1,1}]
+
+        local temp=torch.zeros(chrom:size(1),1,50,1)
+        local temp_chrom=torch.ones(chrom:size())
+        temp:copy(-chrom+1)
+	temp:resize(chrom:size(1),50)	
+        temp=torch.cmul(temp,nn.Replicate(50,2):forward(cnv))
+        temp=temp-nn.Replicate(50,2):forward(temp:select(2,1))
+
+        nowgd=torch.zeros(chrom:size(1),49)
+        nowgd:copy(temp[{{1,chrom:size(1)},{2,50}}])
+
+        temp=torch.zeros(chrom:size(1),1,50,1)
+        temp:copy(torch.abs(chrom-2*torch.floor(chrom/2)))
+        temp:resize(chrom:size(1),50)
+        temp=temp-nn.Replicate(50,2):forward(temp:select(2,1))
+        wgd=torch.zeros(chrom:size(1),49)
+        wgd:copy(temp[{{1,chrom:size(1)},{2,50}}])
+        return {chrom,chrom_new,cnp,nowgd,wgd}
+end
+
 
 
 
@@ -67,7 +100,7 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.15+0.4/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=15 or torch.abs(train.Advantage[i])>=10 ) then
+		if(torch.rand(1)[1]>0.15+0.75/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=15 or torch.abs(train.Advantage[i])>=10 ) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
@@ -113,7 +146,7 @@ LoadData=function(flag)
 		
 
 	for i=1,train.ChrA:size(1) do
-		if (torch.abs(train.Advantage2[i])<100 and torch.rand(1)[1]<0.4/(1+math.exp(-train.step[i]+math.min(5,5+torch.sum(train.step)/batch_sample))) and train.WGD[i]<1) then
+		if (torch.abs(train.Advantage2[i])<100 and torch.rand(1)[1]<0.1/(1+math.exp(-train.step[i]+math.min(5,torch.sum(train.step)/batch_sample))) and train.WGD[i]<1) then
 			train.state[i]=train.state[i]*2
 			train.next[i]=train.next[i]*2
 			train.WGD[i]=1
@@ -594,7 +627,7 @@ Deconvolute=function(cnp,max_step)
 					for j=temp_start,chrom_width do
 						chrom_state_new[1][j][1]=chrom_state_new[1][j][1]+temp_action
 					end
-					End_Point_Model:forward({chrom_state:clone():resize(1,1,50,1),chrom_state_new:clone():resize(1,1,50,1),cnp:clone():resize(1,2,1100,1)})
+					End_Point_Model:forward(End_input(chrom_state,chrom_state_new,cnp))
 					
 					temp_end=torch.zeros(chrom_width,1)-1
 					temp_copy=chrom_state[1]

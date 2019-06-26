@@ -650,4 +650,151 @@ Deconvolute=function(cnp,max_step)
 			end
 end
 
+Deconvolute_WGD=function(cnp,max_step)
+                        flag_chr=0
+                        flag_cnv=0
+                        flag_end=0
+                        rec_flag=false
+	
+	        flag_WGD=false
+                        current_step=0
+                        test.ChrA:zero()
+                        test.CNV:zero()
+                        test.End:zero()
+                        while(current_step<max_step) do
+                                current_step=current_step+1
+                                Chrom_Model:forward(Chrom_input(cnp))
+		if( not flag_WGD) then
+			 max_reward,max_chr=Chrom_Model:get(23).output:resize(1,44):min(2)
+		else
+			 max_reward,max_chr=Chrom_Model:get(11).output:resize(1,44):min(2)
+                                end
 
+                                local max_cnv=-1
+                                local max_end=0
+
+                                max_reward=-max_reward[1][1]
+                                max_chr=max_chr[1][1]
+
+                                if(torch.sum(torch.abs(cnp-2*torch.floor(cnp/2))) <1) then
+                                        local wgd_loss,wgd_time=WGD_LOSS_WGD(cnp/2,0)
+                                        if(wgd_loss > max_reward or (not flag_WGD)) then
+                                                max_reward=wgd_loss
+                                                max_chr=-1
+                                        end
+                                end
+
+                                if(torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss) > max_reward) then
+                                        max_reward=torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)
+                                        max_chr=0
+                                        current_step=max_step
+                                end
+
+                                if max_chr>0 then
+
+                                        local max_allele=torch.floor((max_chr-1)/22)+1
+                                        chrom_state=chrom_extract(cnp,max_chr,max_allele)
+                                        temp_start=torch.zeros(1,chrom_width,1)-1
+                                        temp_copy=chrom_state:clone()
+                                        temp_start[{{},{2,50},}]:copy(temp_copy[{{},{1,49},}])
+                                        temp_start_loci=(temp_copy-temp_start):select(3,1):nonzero()
+
+
+		        if (not flag_WGD) then
+                                        	CNV_Model:forward(CNV_input(chrom_state,torch.ones(2,1100,1)*2))
+		        else
+			CNV_Model:forward(CNV_input(chrom_state,torch.ones(2,1100,1)))
+		      end
+
+                                        temp_max=CNV_Model.output[1][temp_start_loci[1][2]*2-1]
+
+                                        max_cnv=temp_start_loci[1][2]*2-1
+
+                                        for j=1,temp_start_loci:size(1) do
+
+                                                if(CNV_Model.output[1][temp_start_loci[j][2]*2-1] > temp_max) then
+                                                        temp_max=CNV_Model.output[1][temp_start_loci[j][2]*2-1]
+                                                        max_cnv=temp_start_loci[j][2]*2-1
+                                                end
+                                                if (chrom_state[1][temp_start_loci[j][2]][1]-1>-0.5 and not (rec_flag and flag_cnv==temp_start_loci[j][2]*2-1-1)) then
+                                                        if  (temp_start_loci[j][2]*2-1>2) and (CNV_Model.output[1][temp_start_loci[j][2]*2-1-1]>temp_max) then
+                                                                        temp_max=CNV_Model.output[1][temp_start_loci[j][2]*2-1-1]
+                                                                        max_cnv=temp_start_loci[j][2]*2-1-1
+                                                        else
+                                                                if (temp_start_loci[j][2]*2-1<2) and (temp_max<0) then
+                                                                        temp_max=0
+                                                                        max_cnv=0
+                                                                end
+                                                        end
+                                                end
+                                        end
+
+
+
+
+                                        chrom_state_new=chrom_state:clone()
+                                        temp_start=torch.floor(max_cnv/2)+1
+                                        temp_action=2*((max_cnv%2)-0.5)
+                                        for j=temp_start,chrom_width do
+                                                chrom_state_new[1][j][1]=chrom_state_new[1][j][1]+temp_action
+                                        end
+
+		        if (not flag_WGD) then
+                                        	End_Point_Model:forward({chrom_state,chrom_state_new,torch.floor((torch.ones(2,1100,1)*2):mean(2):mean(1):expand(1,50,1)+0.5)})
+		        else
+			End_Point_Model:forward({chrom_state,chrom_state_new,torch.floor((torch.ones(2,1100,1)):mean(2):mean(1):expand(1,50,1)+0.5)})
+		        end
+                                        temp_end=torch.zeros(chrom_width,1)-1
+                                        temp_copy=chrom_state[1]
+                                        temp_end[{{1,49},}]:copy(temp_copy[{{2,50},}])
+                                        if temp_start>1 then
+                                                temp_end[{{1,temp_start-1},}]:copy(temp_copy[{{1,temp_start-1},}])
+                                        end
+                                        temp_end_loci=(temp_copy-temp_end):select(2,1):nonzero()
+                                        if temp_end_loci[1][1]>1 then
+                                                temp_max=End_Point_Model.output[temp_end_loci[1][1]-1]
+                                                max_end=temp_end_loci[1][1]
+                                        else
+                                                temp_max=0
+                                                max_end=1
+                                        end
+                                        for j=1,temp_end_loci:size(1) do
+                                                if(temp_action>0 or chrom_state[1][temp_end_loci[j][1]][1]-1>-0.5) then
+                                                        if (temp_end_loci[j][1] >1) and (End_Point_Model.output[temp_end_loci[j][1]-1]>temp_max) then
+                                                                                        temp_max=End_Point_Model.output[temp_end_loci[j][1]-1]
+                                                                                        max_end=temp_end_loci[j][1]
+                                                        end
+                                                elseif (temp_action<0 and chrom_state[1][temp_end_loci[j][1]][1]-1<-0.5) then
+                                                        break
+                                                end
+                                        end
+
+                                        for j=temp_start,max_end do
+                                                cnp[max_allele][max_chr*chrom_width-chrom_width+j-max_allele*22*chrom_width+22*chrom_width][1]=cnp[max_allele][max_chr*chrom_width-chrom_width+j-max_allele*22*chrom_width+22*chrom_width][1]+temp_action
+                                        end
+
+
+                                end
+
+                                if max_chr<0 then
+                                        cnp:copy(cnp/2)
+		        flag_WGD=true
+                                end
+                                if(max_chr==-1) then
+                                        cnp_b=cnp:clone()
+                                end
+                                test.ChrA[current_step]=max_chr
+                                test.CNV[current_step]=max_cnv+1
+                                test.End[current_step]=max_end
+                                        if(max_cnv%2==1 and flag_chr==max_chr and flag_cnv==max_cnv and flag_end==max_end) then
+                                                rec_flag=true
+                                                flag_cnv=2*torch.floor(max_cnv/2)
+                                        else
+                                                rec_flag=false
+                                                flag_chr=max_chr
+                                                flag_cnv=(1-max_cnv%2)+2*torch.floor(max_cnv/2)
+                                                flag_end=max_end
+                                        end
+
+                        end
+end

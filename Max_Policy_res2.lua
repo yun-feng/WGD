@@ -168,8 +168,8 @@ Chrom_Model=nn.gModule({Chrom_i1,Chrom_i2,Chrom_i3,Chrom_i6,Chrom_i7,Chrom_i8},{
 
 
 CNV_i1=-nn.Identity()
-CNV_i1_r=-nn.MulConstant(1)
-CNV_i2_r=-nn.MulConstant(1)
+CNV_i1_r=-nn.MulConstant(3)
+CNV_i2_r=-nn.MulConstant(3)
 CNV_i3=-nn.Identity()
 
 CNV_Net=nn.Sequential()
@@ -226,6 +226,9 @@ End_Point_h1={End_Point_i1,End_Point_i2}-nn.JoinTable(1,3)
 --End_Point_Net =End_Point_Net-nn.SpatialMaxPooling(1,4,1,4,0,4-width%4)
 
 End_Point_i3=-nn.Identity()
+End_Point_i4=-nn.MulConstant(3)
+End_Point_i5=-nn.MulConstant(3)
+
 --End_Point_h2 =End_Point_i3-nn.SpatialConvolution(nfeats,nkernels[1]/2, 1, 5, 1, 7, 0,3)
 --End_Point_h2 =End_Point_h2-nn.Threshold(0, 1e-6)
 --End_Point_h2 =End_Point_h2-nn.SpatialMaxPooling(1,9,1,3,0,0)
@@ -245,11 +248,18 @@ End_Point_Net:add(nn.Linear(nkernels[3]/2*chrom_width,chrom_width-1))
 
 End_Point_WGD=End_Point_Net:clone()
 
-End_Point_Val_noWGD=End_Point_h1-End_Point_Net-nn.Reshape(chrom_width-1,1)
-End_Point_Val_WGD=End_Point_h1-End_Point_WGD-nn.Reshape(chrom_width-1,1)
+End_Point_Val_noWGD=End_Point_h1-End_Point_Net-nn.Reshape(chrom_width-1)
+End_Point_Val_WGD=End_Point_h1-End_Point_WGD-nn.Reshape(chrom_width-1)
 
 End_WGD=End_Point_i3-Chrom_WGD_res:clone()
 End_WGD=End_WGD-nn.Replicate(chrom_width-1,2)
+
+End_Point_Val_noWGD={End_Point_Val_noWGD,End_Point_i4}-nn.CAddTable()
+End_Point_Val_noWGD=End_Point_Val_noWGD-nn.Reshape(chrom_width-1,1)
+
+End_Point_Val_WGD={End_Point_Val_WGD,End_Point_i5}-nn.CAddTable()
+End_Point_Val_WGD=End_Point_Val_WGD-nn.Reshape(chrom_width-1,1)
+
 
 End_Point_Val={End_Point_Val_noWGD,End_Point_Val_WGD}-nn.JoinTable(2,2)
 End_Point_Val={End_Point_Val,End_WGD}-nn.CMulTable()
@@ -258,4 +268,4 @@ End_Point_Val=End_Point_Val-nn.Sum(3)
 
 --End_Point_Net= End_Point_Net-nn.SoftMax()
 --End_Point_Net=End_Point_Net-nn.Sigmoid()
-End_Point_Model=nn.gModule({End_Point_i1,End_Point_i2,End_Point_i3},{End_Point_Val});
+End_Point_Model=nn.gModule({End_Point_i1,End_Point_i2,End_Point_i3,End_Point_i4,End_Point_i5},{End_Point_Val});

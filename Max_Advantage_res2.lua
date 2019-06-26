@@ -111,7 +111,7 @@ Advantage_cal=function()
 	end
 	
 	
-	End_Point_Model:forward({train.chrom_state,train.chrom_state_new,train.state})
+	End_Point_Model:forward(End_input(train.chrom_state,train.chrom_state_new,train.state))
 	for i = 1,train.state:size(1) do
 
 		if train.valid[i]>0 then
@@ -209,7 +209,7 @@ Advantage_cal2=function()
                         for j=temp_start,chrom_width do
                                 chrom_state_new2[1][j][1]=chrom_state_new2[1][j][1]+temp_action
                         end
-                        End_Point_Model:forward({train.chrom_state[i]:clone():resize(1,1,50,1),chrom_state_new2:clone():resize(1,1,50,1),train.state[i]:clone():resize(1,2,1100,1)})
+                        End_Point_Model:forward(End_input(train.chrom_state[i],chrom_state_new2,train.state[i]))
 
                         temp_end=torch.zeros(chrom_width,1)-1
                         temp_copy=train.chrom_state[i][1]
@@ -263,7 +263,7 @@ Advantage_cal2=function()
 
         train.Advantage2=train.Advantage2+torch.cmul(train.max_next,train.valid);
 
-        End_Point_Model:forward({train.chrom_state,train.chrom_state_new,train.state})
+        End_Point_Model:forward(End_input(train.chrom_state,train.chrom_state_new,train.state))
         for i = 1,train.state:size(1) do
 
                 if train.valid[i]>0 then

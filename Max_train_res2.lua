@@ -242,7 +242,7 @@ feval_End=function(x)
 		end
     end
 	
-    End_Point_Model:backward({train.chrom_state,train.chrom_state_new,torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5)},grad);
+    End_Point_Model:backward(End_input(train.chrom_state,train.chrom_state_new,train.state),grad);
     
     return f,parGrad_End;
 end
@@ -279,7 +279,7 @@ function model_train()
 
 	switch_par=Chrom_Model:get(27):getParameters()
 	switch_par_CNV=CNV_Model:get(12):getParameters()
-	switch_par_End=End_Point_Model:get(10):getParameters()
+	switch_par_End=End_Point_Model:get(16):getParameters()
 	ave_switch=(switch_par+switch_par+switch_par_End)/3
 	switch_par:copy(ave_switch)
 	switch_par_CNV:copy(ave_switch)
@@ -296,7 +296,7 @@ function model_train2()
 
 	switch_par=Chrom_Model:get(27):getParameters()
         switch_par_CNV=CNV_Model:get(12):getParameters()
-        switch_par_End=End_Point_Model:get(10):getParameters()
+        switch_par_End=End_Point_Model:get(16):getParameters()
         ave_switch=(switch_par+switch_par+switch_par_End)/3
         switch_par:copy(ave_switch)
         switch_par_CNV:copy(ave_switch)
