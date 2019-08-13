@@ -31,7 +31,31 @@ test.ChrA=torch.zeros(train.step_sample*2)
 test.CNV=torch.zeros(train.step_sample*2)
 test.End=torch.zeros(train.step_sample*2)
 
+out_file1=wkdir.."COAD_Chr_res"
+out_file2=wkdir.."COAD_CNV_res"
+out_file3=wkdir.."COAD_End_res"
+out1 = assert(io.open(out_file1, "w")) 
+out2 = assert(io.open(out_file2, "w")) 
+out3 = assert(io.open(out_file3, "w")) 
+splitter = "\t"
+for i=0,38 do
+	readdata(i)
+	for j=1,10 do
+		Deconvolute(train.state[j],70)
+		for k=1,70 do
+			out1:write(test.ChrA[k])
+			out2:write(test.CNV[k])
+			out3:write(test.End[k])
+			out1:write(splitter)
+	                out2:write(splitter)
+        	        out3:write(splitter)
 
+		end
+		out1:write("\n")
+		out2:write("\n")
+		out3:write("\n")
+	end
+end
 
 --Deconvolute(train.state[2],train.step_sample*2)
 

@@ -100,7 +100,7 @@ LoadData=function(flag)
 	train.End=torch.floor(torch.cmul(torch.rand(train.state:size(1)),(chrom_width-train.StartL+1)))+train.StartL
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.15+0.75/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=15 or torch.abs(train.Advantage[i])>=10 ) then
+		if(torch.rand(1)[1]>0.15+0.83/(1+math.exp(-1e-4*counter+2)) or torch.abs(train.Advantage2[i])>=15 or torch.abs(train.Advantage[i])>=10 ) then
 			train.state[i]=torch.ones(2,1100,1)
 			train.next[i]=torch.ones(2,1100,1)
 			train.Advantage[i]=0
@@ -131,8 +131,11 @@ LoadData=function(flag)
 	--train.cnv=(torch.floor(torch.rand(train.state:size(1))*2))
 	train.cnv=torch.zeros(train.state:size(1))
 	for i=1,train.ChrA:size(1) do
-		if(torch.rand(1)[1]>0.5) then
+		if(torch.rand(1)[1]>0.8) then
 			train.cnv[i]=1
+		end
+		if(train.WGD[i]>0.5)then
+			train.cnv[i]=1-train.cnv[i]
 		end
 	end
 	train.CNV=train.StartL*2+train.cnv-1
