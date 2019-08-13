@@ -62,6 +62,7 @@ Advantage_cal=function()
 	train.soft_max=torch.zeros(train.max_next:size())
 	train.wgd_times=torch.zeros(train.next:size(1))
 	for i=1,train.state:size(1) do
+		if train.valid[i]>0.5 then
 			temp_val_end=torch.sum(torch.abs(train.next[i]-1))*math.log(single_loci_loss)
 			if( temp_val_end> train.max_next[i]) then
 				train.max_next[i]=temp_val_end
@@ -80,9 +81,11 @@ Advantage_cal=function()
 				end
 			end
 			train.soft_max[i]=torch.log(train.soft_max[i])
+			train.Advantage[i]=train.Advantage[i]+train.max_next[i]+train.soft_max[i];
+		end
 	end
 				
-	train.Advantage=train.Advantage+torch.cmul(train.max_next+train.soft_max,train.valid);
+	
 	
 	Chrom_Model:forward(Chrom_input(train.state))	
 	
@@ -94,7 +97,7 @@ Advantage_cal=function()
 	train.cnv_soft=torch.ones(train.Reward:size())
 	train.cnv_val_max=torch.zeros(train.Reward:size())
 	for i = 1,train.state:size(1) do
-		if train.valid[i]>0 then
+		if train.valid[i]>0.5 then
 			train.Advantage[i]=train.Advantage[i]+(Chrom_Model.output[i][train.ChrA[i]])
 
 			if train.CNV[i]>1 then
@@ -145,7 +148,7 @@ Advantage_cal=function()
 	End_Point_Model:forward(End_input(train.chrom_state,train.chrom_state_new,train.state))
 	for i = 1,train.state:size(1) do
 
-		if train.valid[i]>0 then
+		if train.valid[i]>0.5 then
 				
 			if train.End[i]>1 then
 				train.Advantage[i]=train.Advantage[i]-2*(End_Point_Model.output[i][train.End[i]-1])
@@ -174,6 +177,7 @@ Advantage_cal=function()
 				else
 					if(train.cnv[i]>0 and train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1<-0.5) then
 						break
+					end
 				end
 			end
 			train.Advantage[i]=train.Advantage[i]+2*temp_max+torch.log(temp_soft)
@@ -216,7 +220,7 @@ Advantage_cal2=function()
 
         for i = 1,train.state:size(1) do
 
-                if train.valid[i]>0 then
+                if train.valid[i]>0.5 then
                         train.Advantage[i]=train.Advantage[i]+(Chrom_Model.output[i][train.ChrA[i]])
                         train.Advantage2[i]=train.Advantage2[i]+(Chrom_Model.output[i][train.ChrA[i]])
 
@@ -307,7 +311,7 @@ Advantage_cal2=function()
         End_Point_Model:forward(End_input(train.chrom_state,train.chrom_state_new,train.state))
         for i = 1,train.state:size(1) do
 
-                if train.valid[i]>0 then
+                if train.valid[i]>0.5 then
 
                         if train.End[i]>1 then
                                 train.Advantage[i]=train.Advantage[i]-2*(End_Point_Model.output[i][train.End[i]-1])

@@ -77,7 +77,7 @@ feval_Chrom=function(x)
     
 	local grad=torch.zeros(Chrom_Model.output:size())
 	for i= 1,grad:size(1) do
-	if train.valid[i]>0 then
+	if train.valid[i]>0.5 then
 		grad[i][train.ChrA[i]]=train.Advantage2[i]/(train.Advantage:size(1))
 	--	if(train.WGD[i]<0.5) then
 	--		temp_chr=torch.Tensor(44):copy(torch.gt(torch.abs((train.state[i]-1)):resize(2,22,50):sum(3),0.5):resize(44))
@@ -180,7 +180,7 @@ feval_CNV=function(x)
     local f=train.Advantage;
 	local grad=torch.zeros(CNV_Model.output:size())
 	for i= 1,grad:size(1) do
-		if train.valid[i]>0 then
+		if train.valid[i]>0.5 then
         	if train.CNV[i]>1 then
 				grad[i][train.CNV[i]-1]=-2*train.Advantage[i]/(train.Advantage:size(1))
 			end
@@ -228,7 +228,7 @@ feval_End=function(x)
     
 	local grad=torch.zeros(End_Point_Model.output:size())
 	for i= 1,grad:size(1) do
-		if train.valid[i]>0 then
+		if train.valid[i]>0.5 then
         	if train.End[i]>1 then
         	    grad[i][train.End[i]-1]=-2*train.Advantage[i]/(train.Advantage:size(1))
         	end

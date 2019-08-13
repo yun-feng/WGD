@@ -107,7 +107,7 @@ LoadData=function(flag)
 			train.step[i]=0
 			train.WGD[i]=0
 		else
-			if((train.valid[i]>0) and ( torch.abs(train.Advantage2[i])<7) and (torch.abs(train.Advantage[i])<7)) then
+			if((train.valid[i]>0.5) and ( torch.abs(train.Advantage2[i])<7) and (torch.abs(train.Advantage[i])<7)) then
 				train.next[i]=train.state[i]:clone()
 				train.step[i]=train.step[i]+1
 				train.Advantage[i]=0--train.Advantage[i]*(1/train.step[i])
@@ -210,7 +210,7 @@ LoadData=function(flag)
 	train.WGD_flag=torch.zeros(train.state:size(1))
 	local startL,endL;
 	for i=1,train.Reward:size(1) do
-		if train.valid[i]>0 then
+		if train.valid[i]>0.5 then
 			train.Reward[i]=Reward(train.ChrA[i],train.StartL[i],train.End[i],train.state[i],train.next[i])
 			if((torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
 				train.WGD_flag[i]=1
@@ -265,7 +265,7 @@ LoadData_chr=function()
 		
 
 	for i=1,train.ChrA:size(1) do
-		if train.valid[i] then
+		if train.valid[i]>0.5 then
 			train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i],train.allele[i])
 					train.chrom_state_new[i]=train.chrom_state[i]:clone()
 
@@ -304,7 +304,7 @@ LoadData_chr=function()
 	train.WGD_flag=torch.zeros(train.state:size(1))
 	local startL,endL;
 	for i=1,train.Reward:size(1) do
-		if train.valid[i]>0 then
+		if train.valid[i]>0.5 then
 			train.Reward[i]=Reward(train.ChrA[i],train.StartL[i],train.End[i],train.state[i],train.next[i])
 			if((torch.floor(train.next[i]/2)*2-train.next[i]):abs():sum()<1) then
 				train.WGD_flag[i]=1
@@ -368,7 +368,7 @@ LoadData_t=function(step)
 			train.End_sample:select(2,step):copy(train.End)
 		
 			for i=1,train.ChrA:size(1) do
-				if(train.valid[i]>0)  then
+				if(train.valid[i]>0.5)  then
 						train.next[i]=train.state[i]:clone()
 				else
 						train.state[i]=train.next[i]:clone()
