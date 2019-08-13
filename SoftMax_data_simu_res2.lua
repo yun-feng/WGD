@@ -244,13 +244,11 @@ LoadData_chr=function()
 	train.End=train.max_end
 	
 	--train.allele=torch.floor(torch.rand(train.state:size(1))*2)+1
-	for i=1,train.ChrA:size(1) do
 
-		train.state[i]=train.state[i]:clone()
-		train.next[i]=train.state[i]:clone()
-		train.Advantage[i]=0
+		train.state=train.state:clone()
+		train.next=train.state:clone()
+		train.Advantage:zero()
 		
-	end
 	
 	train.allele=torch.floor((train.ChrA-1)/22)+1
 	--train.cnv=(torch.floor(torch.rand(train.state:size(1))*2))
@@ -258,7 +256,7 @@ LoadData_chr=function()
 
 	train.CNV=train.StartL*2+train.cnv-1
 	train.cnv=(train.cnv-0.5)*2
-	train.valid=torch.ones(train.state:size(1))
+	
 	train.start_loci={}
 	train.end_loci={}
 	
@@ -267,46 +265,35 @@ LoadData_chr=function()
 		
 
 	for i=1,train.ChrA:size(1) do
-		
-		train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i],train.allele[i])
-                train.chrom_state_new[i]=train.chrom_state[i]:clone()
+		if train.valid[i] then
+			train.chrom_state[i]=chrom_extract(train.state[i],train.ChrA[i],train.allele[i])
+					train.chrom_state_new[i]=train.chrom_state[i]:clone()
 
-		for j=train.StartL[i],chrom_width do
-			--train.chrom_state_new[i][1][j][1]=train.chrom_state_new[i][1][j][1]-train.cnv[i]
-			if j<=train.End[i] then
-				train.chrom_state_new[i][1][j][1]=train.chrom_state[i][1][j][1]+train.cnv[i]
-				train.next[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+j-train.allele[i]*22*chrom_width+22*chrom_width][1]=train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+j-train.allele[i]*22*chrom_width+22*chrom_width][1]+train.cnv[i]
-				if(train.chrom_state[i][1][j][1]<0) then
-					train.valid[i]=0
+			for j=train.StartL[i],chrom_width do
+				--train.chrom_state_new[i][1][j][1]=train.chrom_state_new[i][1][j][1]-train.cnv[i]
+					train.chrom_state_new[i][1][j][1]=train.chrom_state[i][1][j][1]+train.cnv[i]
+				if j<=train.End[i] then					
+					train.next[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+j-train.allele[i]*22*chrom_width+22*chrom_width][1]=train.state[i][train.allele[i]][train.ChrA[i]*chrom_width-chrom_width+j-train.allele[i]*22*chrom_width+22*chrom_width][1]+train.cnv[i]
 				end
-			else 
-				train.chrom_state_new[i][1][j][1]=train.chrom_state_new[i][1][j][1]+train.cnv[i]
-			
+
 			end
 
-		end
-		if(train.StartL[i]>1 and torch.abs(train.chrom_state[i][1][train.StartL[i]][1]-train.chrom_state[i][1][train.StartL[i]-1][1])<0.01) then
-                        train.valid[i]=0
-                end
-                if(train.End[i]<50 and torch.abs(train.chrom_state[i][1][train.End[i]][1]-train.chrom_state[i][1][train.End[i]+1][1])<0.01) then
-                        train.valid[i]=0
-                end
-	
-		temp_start=torch.zeros(1,chrom_width,1)-1
-		temp_copy=train.chrom_state[i]
-		temp_start[{{},{2,50},}]:copy(temp_copy[{{},{1,49},}])
-		temp_start_loci=(temp_copy-temp_start):select(3,1):nonzero()
-		table.insert(train.start_loci,temp_start_loci)
-
-		temp_end=torch.zeros(chrom_width,1)-1
-		temp_copy=train.chrom_state[i][1]
-		temp_end[{{1,49},}]:copy(temp_copy[{{2,50},}])
-		if train.StartL[i]>1 then
-				temp_end[{{1,train.StartL[i]-1},}]:copy(temp_copy[{{1,train.StartL[i]-1},}])
-		end
-		temp_end_loci=(temp_copy-temp_end):select(2,1):nonzero()
-		table.insert(train.end_loci,temp_end_loci)
 		
+			temp_start=torch.zeros(1,chrom_width,1)-1
+			temp_copy=train.chrom_state[i]
+			temp_start[{{},{2,50},}]:copy(temp_copy[{{},{1,49},}])
+			temp_start_loci=(temp_copy-temp_start):select(3,1):nonzero()
+			table.insert(train.start_loci,temp_start_loci)
+
+			temp_end=torch.zeros(chrom_width,1)-1
+			temp_copy=train.chrom_state[i][1]
+			temp_end[{{1,49},}]:copy(temp_copy[{{2,50},}])
+			if train.StartL[i]>1 then
+					temp_end[{{1,train.StartL[i]-1},}]:copy(temp_copy[{{1,train.StartL[i]-1},}])
+			end
+			temp_end_loci=(temp_copy-temp_end):select(2,1):nonzero()
+			table.insert(train.end_loci,temp_end_loci)
+		end
 	end
 	
 	--Compute CNP at the next time point

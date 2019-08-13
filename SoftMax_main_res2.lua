@@ -61,6 +61,7 @@ for c=0,cycle do
 	temp_state=train.state:clone()
 	temp_next=train.next:clone()
 	LoadData_chr()
+	model_train()
 	Error=torch.log(torch.sum(torch.pow(train.Advantage,2))/train.Advantage:size(1))
     print(string.format("Error: %6.6f",Error));
 	train.state=temp_state
