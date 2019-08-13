@@ -515,9 +515,9 @@ LoadData_t=function(step)
 				train.valid[i]=1
 			
                 if ( train.WGD_sample[i]<0.5 and (torch.rand(1)[1]<0.1/(1+math.exp(-train.step_sample+step+10)) or step==1)) then
-                       train.state[i]=train.state[i]*2
-                        train.next[i]=train.next[i]*2
-                        train.WGD_sample[i]=step
+                --       train.state[i]=train.state[i]*2
+                --        train.next[i]=train.next[i]*2
+                 --       train.WGD_sample[i]=step
                 end
 
                 for j=train.StartL[i],train.End[i] do

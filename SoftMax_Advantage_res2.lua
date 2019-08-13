@@ -57,7 +57,7 @@ Advantage_cal=function()
 	Chrom_Model:forward(Chrom_input(train.next))
 --{train.next,train.next,train.next,torch.floot(train.next/2),torch.floor((train.next+1)/2),train.chr_state,train.chr_next})
 	train.Advantage=train.Advantage+train.Reward:clone()
-
+	Chrom_Model_output=Chrom_Model.output:clone()
 	train.max_next=-Chrom_Model.output:min(2):resize(train.Reward:size())
 	train.soft_max=torch.zeros(train.max_next:size())
 	train.wgd_times=torch.zeros(train.next:size(1))
@@ -67,17 +67,17 @@ Advantage_cal=function()
 				train.max_next[i]=temp_val_end
 			end
 			
+			train.soft_max[i]=torch.sum(torch.exp(-Chrom_Model_output[i]-train.max_next[i]))+torch.exp(temp_val_end-train.max_next[i])
+
 			if(train.WGD_flag[i]==1) then
 				local wgd_loss,wgd_time=WGD_LOSS(train.next[i]/2,0)
 				if(wgd_loss > train.max_next[i]) then
+					train.soft_max[i]=train.soft_max[i]*torch.exp(train.max_next[i]-wgd_loss)+1
 					train.max_next[i]=wgd_loss
 					train.wgd_times[i]=wgd_time
-
+				else
+					train.soft_max[i]=train.soft_max[i]+torch.exp(wgd_loss-train.max_next[i])
 				end
-			end
-			train.soft_max[i]=torch.sum(torch.exp(-Chrom_Model.output[i]-train.max_next[i]))+torch.exp(temp_val_end-train.max_next[i])
-			if(train.WGD_flag[i]==1) then
-				train.soft_max[i]=train.soft_max[i]+torch.exp(wgd_loss-train.max_next[i])
 			end
 			train.soft_max[i]=torch.log(train.soft_max[i])
 	end
@@ -91,8 +91,8 @@ Advantage_cal=function()
 	CNV_Model:forward(CNV_input(train.chrom_state,train.state))
 --{torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state})
 	
-	train.cnv_soft=torch.zeros(tran.Reward:size())
-	train.cnv_val_max=torch.zeros(tran.Reward:size())
+	train.cnv_soft=torch.zeros(train.Reward:size())
+	train.cnv_val_max=torch.zeros(train.Reward:size())
 	for i = 1,train.state:size(1) do
 		if train.valid[i]>0 then
 			train.Advantage[i]=train.Advantage[i]+(Chrom_Model.output[i][train.ChrA[i]])
@@ -140,8 +140,8 @@ Advantage_cal=function()
 		
 	end
 	
-	train.end_soft=torch.zeros(tran.Reward:size())
-	train.end_val_max=torch.zeros(tran.Reward:size())
+	train.end_soft=torch.zeros(train.Reward:size())
+	train.end_val_max=torch.zeros(train.Reward:size())
 	End_Point_Model:forward(End_input(train.chrom_state,train.chrom_state_new,train.state))
 	for i = 1,train.state:size(1) do
 

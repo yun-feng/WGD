@@ -8,9 +8,9 @@ wkdir="/data/ted/WGD/SoftMax_"
 
 dofile (wkdir.."Policy_res2.lua");
 
-Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res");
-CNV_Model=torch.load(wkdir.."Model_CNV_Model_res");
-End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_res");
+--Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res");
+--CNV_Model=torch.load(wkdir.."Model_CNV_Model_res");
+--End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_res");
 
 
 dofile (wkdir.."Advantage_res2.lua");
@@ -18,7 +18,7 @@ dofile (wkdir.."train_res2.lua");
 dofile (wkdir.."data_simu_res2.lua");
 
 cycle=100000000
-counter=80000;
+counter=0000;
 LoadData(true)
 
 for c=0,cycle do
