@@ -91,7 +91,7 @@ Advantage_cal=function()
 	CNV_Model:forward(CNV_input(train.chrom_state,train.state))
 --{torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state})
 	
-	train.cnv_soft=torch.zeros(train.Reward:size())
+	train.cnv_soft=torch.ones(train.Reward:size())
 	train.cnv_val_max=torch.zeros(train.Reward:size())
 	for i = 1,train.state:size(1) do
 		if train.valid[i]>0 then
@@ -140,7 +140,7 @@ Advantage_cal=function()
 		
 	end
 	
-	train.end_soft=torch.zeros(train.Reward:size())
+	train.end_soft=torch.ones(train.Reward:size())
 	train.end_val_max=torch.zeros(train.Reward:size())
 	End_Point_Model:forward(End_input(train.chrom_state,train.chrom_state_new,train.state))
 	for i = 1,train.state:size(1) do
