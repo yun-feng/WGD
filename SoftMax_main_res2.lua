@@ -3,7 +3,7 @@ require "torch"
 
 opt={};
 train={};
-wkdir="/data/ted/WGD/Max_"
+wkdir="/data/ted/WGD/SoftMax_"
 
 
 dofile (wkdir.."Policy_res2.lua");
@@ -52,10 +52,10 @@ for c=0,cycle do
 --		split_train=split_train-1;
 --	end
 	model_train()
-	train.Advantage2:zero()
-	train.Advantage:zero()
-	Advantage_cal2()
-	model_train2()
+	--train.Advantage2:zero()
+--	train.Advantage:zero()
+--	Advantage_cal2()
+--	model_train2()
 	Error=torch.log(torch.sum(torch.pow(train.Advantage,2))/train.Advantage:size(1))
     print(string.format("Error: %6.6f",Error));
 	Loss=torch.log(torch.sum(torch.pow(train.Advantage2,2))/train.Advantage:size(1))
