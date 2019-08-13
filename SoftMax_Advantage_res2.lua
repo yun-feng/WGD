@@ -27,22 +27,30 @@ Reward=function(ChrA,StartL,EndL,StartS,EndS)
 end
 
 WGD_LOSS=function(cnp,time)
-	local reward_next;
+	local reward_next,reward_soft,reward_end;
 	--reward_next=-Chrom_Model:forward((nn.JoinTable(3,3):forward({cnp-1,cnp-2*torch.floor(cnp/2)-1}):resize(1,2,1100,2))):min()
 	reward_next=-Chrom_Model:forward(Chrom_input(cnp)):min()
+	reward_soft=torch.sum(torch.exp(-Chrom_Model.output-reward_next))
 --({cnp,cnp,cnp,torch.floot(cnp/2),torch.floor((cnp+1)/2),train.chr_state,train.chr_next})
-	if(reward_next< torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)) then
-		reward_next=torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)
+	reward_end=torch.sum(torch.abs(cnp-1))*math.log(single_loci_loss)
+	if(reward_next< reward_end) then
+		reward_soft=reward_soft*torch.exp(reward_next-reward_end)+1
+		reward_next=reward_end
+	else 
+		reward_soft=reward_soft+torch.exp(reward_end-reward_next)
 	end
 	
 	if (torch.sum(torch.abs(cnp-2*torch.floor(cnp/2))) <1 and torch.sum(cnp)>0) then
 		local temp=WGD_LOSS(torch.floor(cnp/2),time)
 		if (temp> reward_next) then
+			reward_soft=reward_soft*torch.exp(reward_next-temp)+1
 			reward_next=temp
 			time=time+1
+		else
+			reward_soft=reward_soft+torch.exp(temp-reward_next)
 		end
 	end
-	return reward_next+math.log(WGD),time;
+	return reward_next+torch.log(reward_soft)+math.log(WGD),time;
 end	
 
 Advantage_cal=function()
@@ -51,11 +59,14 @@ Advantage_cal=function()
 	train.Advantage=train.Advantage+train.Reward:clone()
 
 	train.max_next=-Chrom_Model.output:min(2):resize(train.Reward:size())
+	train.soft_max=torch.zeros(train.max_next:size())
 	train.wgd_times=torch.zeros(train.next:size(1))
 	for i=1,train.state:size(1) do
-			if(torch.sum(torch.abs(train.next[i]-1))*math.log(single_loci_loss) > train.max_next[i]) then
-				train.max_next[i]=torch.sum(torch.abs(train.next[i]-1))*math.log(single_loci_loss)
+			temp_val_end=torch.sum(torch.abs(train.next[i]-1))*math.log(single_loci_loss)
+			if( temp_val_end> train.max_next[i]) then
+				train.max_next[i]=temp_val_end
 			end
+			
 			if(train.WGD_flag[i]==1) then
 				local wgd_loss,wgd_time=WGD_LOSS(train.next[i]/2,0)
 				if(wgd_loss > train.max_next[i]) then
@@ -64,9 +75,14 @@ Advantage_cal=function()
 
 				end
 			end
+			train.soft_max[i]=torch.sum(torch.exp(-Chrom_Model.output[i]-train.max_next[i]))+torch.exp(temp_val_end-train.max_next[i])
+			if(train.WGD_flag[i]==1) then
+				train.soft_max[i]=train.soft_max[i]+torch.exp(wgd_loss-train.max_next[i])
+			end
+			train.soft_max[i]=torch.log(train.soft_max[i])
 	end
 				
-	train.Advantage=train.Advantage+torch.cmul(train.max_next,train.valid);
+	train.Advantage=train.Advantage+torch.cmul(train.max_next+train.soft_max,train.valid);
 	
 	Chrom_Model:forward(Chrom_input(train.state))	
 	
@@ -76,7 +92,6 @@ Advantage_cal=function()
 --{torch.floor(train.state:mean(3):mean(2):expand(train.state:size(1),1,50,1)+0.5),train.chrom_state})
 	
 	for i = 1,train.state:size(1) do
-
 		if train.valid[i]>0 then
 			train.Advantage[i]=train.Advantage[i]+(Chrom_Model.output[i][train.ChrA[i]])
 
@@ -84,25 +99,37 @@ Advantage_cal=function()
 				train.Advantage[i]=train.Advantage[i]-2*(CNV_Model.output[i][train.CNV[i]-1])
 			end
 			temp_max=CNV_Model.output[i][train.start_loci[i][1][2]*2-1]
+			temp_soft=1
 			train.max_cnv[i]=train.start_loci[i][1][2]*2-1
 			for j=1,train.start_loci[i]:size(1) do
 				if(CNV_Model.output[i][train.start_loci[i][j][2]*2-1] > temp_max) then
+					temp_soft=temp_soft*torch.exp(2*temp_max-2*CNV_Model.output[i][train.start_loci[i][j][2]*2-1])+1
 					temp_max=CNV_Model.output[i][train.start_loci[i][j][2]*2-1]
 					train.max_cnv[i]=train.start_loci[i][j][2]*2-1
+				else
+					temp_soft=temp_soft+torch.exp(2*CNV_Model.output[i][train.start_loci[i][j][2]*2-1]-2*temp_max)
 				end
 				if (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>-0.5) then
-					if  (train.start_loci[i][j][2]*2-1>2) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]>temp_max) then
+					if  (train.start_loci[i][j][2]*2-1>2)  then
+						if (CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]>temp_max) then
+							temp_soft=temp_soft*torch.exp(2*temp_max-2*CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1])+1
 							temp_max=CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]
 							train.max_cnv[i]=train.start_loci[i][j][2]*2-1-1
-					else
-						if (train.start_loci[i][j][2]*2-1<2) and (temp_max<0) then
+						else 
+							temp_soft=temp_soft+torch.exp(2*CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]-2*temp_max)
+						end
+					else 
+						if (temp_max<0) then
+							temp_soft=temp_soft*torch.exp(2*temp_max)+1
 							temp_max=0
 							train.max_cnv[i]=0
+						else 
+							temp_soft=temp_soft+torch.exp(-2*temp_max)
 						end
 					end
 				end
 			end
-			train.Advantage[i]=train.Advantage[i]+2*temp_max
+			train.Advantage[i]=train.Advantage[i]+2*temp_max+torch.log(temp_soft)
 			
 			--reload max action
 			
@@ -126,18 +153,23 @@ Advantage_cal=function()
 				temp_max=0
 				train.max_end[i]=1
 			end
+			temp_soft=1
 			for j=1,train.end_loci[i]:size(1) do
 				if(train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>-0.5) then
 					if train.end_loci[i][j][1] >1 then
+						temp_soft=temp_soft*torch.exp(2*temp_max-2*math.max(temp_max,(End_Point_Model.output[i][train.end_loci[i][j][1]-1])))+
+									torch.exp(2*End_Point_Model.output[i][train.end_loci[i][j][1]-1]-2*math.max(temp_max,(End_Point_Model.output[i][train.end_loci[i][j][1]-1])))
 						temp_max=math.max(temp_max,(End_Point_Model.output[i][train.end_loci[i][j][1]-1]))
 						train.max_end[i]=train.end_loci[i][1][1]
 
 					else
+						temp_soft=temp_soft*torch.exp(2*temp_max-math.max(temp_max,0))+
+									torch.exp(-2*math.max(temp_max,0))
 						temp_max=math.max(temp_max,0)
 					end
 				end
 			end
-			train.Advantage[i]=train.Advantage[i]+2*temp_max
+			train.Advantage[i]=train.Advantage[i]+2*temp_max+torch.log(temp_soft)
 		end
 	end
 	
