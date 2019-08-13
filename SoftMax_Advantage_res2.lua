@@ -100,8 +100,8 @@ Advantage_cal=function()
 			if train.CNV[i]>1 then
 				train.Advantage[i]=train.Advantage[i]-2*(CNV_Model.output[i][train.CNV[i]-1])
 			end
-			temp_max=CNV_Model.output[i][train.start_loci[i][1][2]*2-1]
-			temp_soft=1
+			temp_max=CNV_Model.output[i][train.start_loci[i][1][2]*2-1]-1
+			temp_soft=0
 			train.max_cnv[i]=train.start_loci[i][1][2]*2-1
 			for j=1,train.start_loci[i]:size(1) do
 				if(CNV_Model.output[i][train.start_loci[i][j][2]*2-1] > temp_max) then
@@ -151,13 +151,13 @@ Advantage_cal=function()
 				train.Advantage[i]=train.Advantage[i]-2*(End_Point_Model.output[i][train.End[i]-1])
 			end
 			if train.end_loci[i][1][1]>1 then
-				temp_max=End_Point_Model.output[i][train.end_loci[i][1][1]-1]
+				temp_max=End_Point_Model.output[i][train.end_loci[i][1][1]-1]-1
 				train.max_end[i]=train.end_loci[i][1][1]
 			else
-				temp_max=0
+				temp_max=-1
 				train.max_end[i]=1
 			end
-			temp_soft=1
+			temp_soft=0
 			for j=1,train.end_loci[i]:size(1) do
 				if(train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>-0.5) then
 					if train.end_loci[i][j][1] >1 then
@@ -171,6 +171,9 @@ Advantage_cal=function()
 									torch.exp(-2*math.max(temp_max,0))
 						temp_max=math.max(temp_max,0)
 					end
+				else
+					if(train.cnv[i]>0 and train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1<-0.5) then
+						break
 				end
 			end
 			train.Advantage[i]=train.Advantage[i]+2*temp_max+torch.log(temp_soft)
