@@ -187,11 +187,11 @@ feval_CNV=function(x)
 			
 			for j=1,train.start_loci[i]:size(1) do
 				grad[i][train.start_loci[i][j][2]*2-1]=grad[i][train.start_loci[i][j][2]*2-1]+
-														2*train.Advantage[i]/(train.Advantage:size(1))*torch.exp(CNV_Model.output[i][train.start_loci[i][j][2]*2-1]-train.cnv_val_max[i])/train.cnv_soft[i]
+														2*train.Advantage[i]/(train.Advantage:size(1))*torch.exp(2*CNV_Model.output[i][train.start_loci[i][j][2]*2-1]-2*train.cnv_val_max[i])/train.cnv_soft[i]
 				if (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>-0.5) then
 					if  (train.start_loci[i][j][2]*2-1>2)  then
 						grad[i][train.start_loci[i][j][2]*2-1-1]=grad[i][train.start_loci[i][j][2]*2-1-1]+
-														2*train.Advantage[i]/(train.Advantage:size(1))*torch.exp(CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]-train.cnv_val_max[i])/train.cnv_soft[i]
+														2*train.Advantage[i]/(train.Advantage:size(1))*torch.exp(2*CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]-2*train.cnv_val_max[i])/train.cnv_soft[i]
 					end
 				end
 			end
@@ -235,26 +235,16 @@ feval_End=function(x)
 			
 			
 			
-		    --local temp=torch.sum(End_Point_Model.output[{i,{train.StartL[i],chrom_width}}])
---			local temp,templ	
---			if train.end_loci[i][1][1]>1 then
---				temp=End_Point_Model.output[i][train.end_loci[i][1][1]-1]
---				temp_l=train.end_loci[i][1][1]-1
---			else
---				temp=0
---				temp_l=0
---			end
 			for j=1,train.end_loci[i]:size(1) do
 				if(train.end_loci[i][j][1]>1 and (train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>-0.5)) then
 					grad[i][train.end_loci[i][j][1]-1]=grad[i][train.end_loci[i][j][1]-1]+
-														2*train.Advantage[i]/(train.Advantage:size(1))*torch.exp(End_Point_Model.output[i][train.end_loci[i][j][1]-1]-train.end_val_max[i])/train.end_soft[i]
---					temp_l=train.end_loci[i][j][1]-1
---					temp=End_Point_Model.output[i][temp_l]
+														2*train.Advantage[i]/(train.Advantage:size(1))*torch.exp(2*End_Point_Model.output[i][train.end_loci[i][j][1]-1]-2*train.end_val_max[i])/train.end_soft[i]
+				else
+					if(train.cnv[i]<0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1<-0.5) then
+						break
+					end
 				end
 			end
---			if temp_l>0 then
---				grad[i][temp_l]=grad[i][temp_l]+2*train.Advantage[i]/(train.Advantage:size(1))
---			end
 		end
     end
 	
@@ -264,26 +254,10 @@ feval_End=function(x)
 end
 
 function model_train()
-	--old_layer_par=Chrom_Model:get(2):getParameters()
-        -- old_layer_par= old_layer_par:clone()
 	
 	par_Chrom,parGrad_Chrom=Chrom_Model:getParameters();
 
 	local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
-	-- local temp,losses=optim.nag(feval_Chrom,par_Chrom,opt.State_Chrom_nag);
-
-	
-	--layer2_par=Chrom_Model:get(2):getParameters()
-        --layer11_par=Chrom_Model:get(13):getParameters()
-        --layer13_par=Chrom_Model:get(15):getParameters()
-       -- layer16_par=Chrom_Model:get(18):getParameters()
-        --layer18_par=Chrom_Model:get(20):getParameters()
-        --ave=(layer2_par+layer11_par+layer13_par+layer16_par+layer18_par)-4*old_layer_par
-        -- layer2_par:copy(ave)
-        -- layer11_par:copy(ave)
-        -- layer13_par:copy(ave)
-        -- layer16_par:copy(ave)
-        -- layer18_par:copy(ave)
 
 	par_CNV,parGrad_CNV=CNV_Model:getParameters()
 
@@ -303,21 +277,4 @@ function model_train()
 end
 
 
-function model_train2()
-
-        par_Chrom,parGrad_Chrom=Chrom_Model:getParameters();
-
-        local temp,losses=opt.Method(feval_Chrom,par_Chrom,opt.State_Chrom);
-        
-
-	switch_par=Chrom_Model:get(27):getParameters()
-        switch_par_CNV=CNV_Model:get(12):getParameters()
-        switch_par_End=End_Point_Model:get(16):getParameters()
-        ave_switch=(switch_par+switch_par+switch_par_End)/3
-        switch_par:copy(ave_switch)
-        switch_par_CNV:copy(ave_switch)
-        switch_par_End:copy(ave_switch)
-
-
-end
 

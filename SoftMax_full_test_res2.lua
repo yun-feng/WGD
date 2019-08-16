@@ -8,7 +8,7 @@ train={}
 test={}
 
 dofile (wkdir.."Policy_res2.lua");
-dofile(wkdir.."read_data.lua");
+--dofile(wkdir.."read_data.lua");
 
 Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res");
 CNV_Model=torch.load(wkdir.."Model_CNV_Model_res");

@@ -175,9 +175,7 @@ Advantage_cal=function()
 						temp_max=math.max(temp_max,0)
 					end
 				else
-					if(train.cnv[i]>0 and train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1<-0.5) then
 						break
-					end
 				end
 			end
 			train.Advantage[i]=train.Advantage[i]+2*temp_max+torch.log(temp_soft)
