@@ -57,6 +57,7 @@ test.Naive2=torch.zeros(Nsample)
 temp_state=train.state:clone()
 for i=1,Nsample do
 	if (torch.sum(train.state[i])/2200>1.7) then
+		test.Naive2[j*10+i]=test.Naive2[j*10+i]+1
 		for chr=1,44 do
 			temp_allele=torch.floor((chr-1)/22)
 			temp_chr=train.state[i][{temp_allele+1,{(chr-1-temp_allele*22)*50+1,(chr-1-temp_allele*22)*50+50},1}]:clone()
