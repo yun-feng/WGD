@@ -19,7 +19,7 @@ dofile (wkdir.."train_res.lua");
 dofile (wkdir.."data_simu_res.lua");
 
 train.step_sample=50
-Nsample=100
+Nsample=50
 train.Chr_sample=torch.zeros(Nsample,train.step_sample)
 train.CNV_sample=torch.zeros(Nsample,train.step_sample)
 train.End_sample=torch.zeros(Nsample,train.step_sample)
@@ -27,11 +27,35 @@ train.WGD_sample=torch.zeros(Nsample)
 
 LoadData_t(train.step_sample)
 
+
+
+out_file1=wkdir.."simu_Chr_WGD_train"
+out_file2=wkdir.."simu_CNV_WGD_train"
+out_file3=wkdir.."simu_End_WGD_train"
+out1 = assert(io.open(out_file1, "w")) 
+out2 = assert(io.open(out_file2, "w")) 
+out3 = assert(io.open(out_file3, "w")) 
+splitter = "\t"
+for i=1,Nsample do
+	for k=1,70 do
+		out1:write(train.Chr_sample[i][k])
+		out2:write(train.Chr_sample[i][k])
+		out3:write(train.Chr_sample[i][k])
+		out1:write(splitter)
+		out2:write(splitter)
+		out3:write(splitter)
+	end
+	out1:write("\n")
+	out2:write("\n")
+	out3:write("\n")
+end
+
+
 test.ChrA=torch.zeros(train.step_sample*2)
 test.CNV=torch.zeros(train.step_sample*2)
 test.End=torch.zeros(train.step_sample*2)
 
-Nsample=100
+Nsample=50
 test.Naive=torch.zeros(Nsample)
 for i=1,Nsample do
 	for chr=1,44 do
@@ -85,6 +109,16 @@ end
 train.state=temp_state
 test.truth=torch.zeros(Nsample)
 test.rl=torch.zeros(Nsample)
+
+
+out_file4=wkdir.."simu_step_WGD_test"
+out_file5=wkdir.."simu_Chr_WGD_rl"
+out_file6=wkdir.."simu_CNV_WGD_rl"
+out_file7=wkdir.."simu_End_WGD_rl"
+out4 = assert(io.open(out_file4, "w")) 
+out5 = assert(io.open(out_file5, "w")) 
+out6 = assert(io.open(out_file6, "w")) 
+out7 = assert(io.open(out_file7, "w")) 
 for i=1,Nsample do
 	cnp_a=train.state[i]:clone()
 	test.ChrA=torch.zeros(train.step_sample+20)
@@ -93,9 +127,25 @@ for i=1,Nsample do
 	Deconvolute_WGD(train.state[i],train.step_sample+20)
 	test.rl[i]=test.rl[i]+0.0+test.ChrA:nonzero():size(1)
 	test.truth[i]=math.min(test.rl[i],test.Naive[i],train.Chr_sample[i]:nonzero():size(1)+torch.ceil(train.WGD_sample[i]/train.step_sample))
-	if(test.rl[i]==test.truth[i]) then
-	--	break
+	out4:write(test.Naive[i])
+	out4:write(splitter)
+	out4:write(test.Naive2[i])
+	out4:write(splitter)
+	out4:write(test.rl[i])
+	out4:write(splitter)
+	out4:write(test.truth[i])
+	out4:write("\n")
+	for k=1,70 do
+		out5:write(test.ChrA[k])
+		out6:write(test.CNV[k])
+		out7:write(test.End[k])
+		out5:write(splitter)
+	    out6:write(splitter)
+        out7:write(splitter)
 	end
+	out5:write("\n")
+	out6:write("\n")
+	out7:write("\n")
 end
 
 
