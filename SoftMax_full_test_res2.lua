@@ -57,7 +57,7 @@ test.Naive2=torch.zeros(Nsample)
 temp_state=train.state:clone()
 for i=1,Nsample do
 	if (torch.sum(train.state[i])/2200>1.7) then
-		test.Naive2[j*10+i]=test.Naive2[j*10+i]+1
+		test.Naive2[i]=test.Naive2[i]+1
 		for chr=1,44 do
 			temp_allele=torch.floor((chr-1)/22)
 			temp_chr=train.state[i][{temp_allele+1,{(chr-1-temp_allele*22)*50+1,(chr-1-temp_allele*22)*50+50},1}]:clone()
@@ -65,12 +65,12 @@ for i=1,Nsample do
 			temp_break=0
 			for j=1,50 do
 				if(not (temp_chr[j]==temp_break) )then
-				temp_break=temp[j]
+				temp_break=temp_chr[j]
 				test.Naive2[i]=test.Naive2[i]+torch.abs(temp_break)
 				end
 			end
 		end
-		train.state[i]=torch.floor(train.state[i]/2)*2
+		train.state[i]=torch.floor(train.state[i]/2)
 	end
 	for chr=1,44 do
 		temp_allele=torch.floor((chr-1)/22)	
