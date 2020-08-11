@@ -3,14 +3,14 @@ require "torch"
 
 opt={};
 train={};
-wkdir="/data/ted/WGD/Max_"
+wkdir="/data/suzaku/ted/WGD/Max_"
 
 
 dofile (wkdir.."Policy_res2.lua");
 
-Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res");
-CNV_Model=torch.load(wkdir.."Model_CNV_Model_res");
-End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_res");
+--Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res");
+--CNV_Model=torch.load(wkdir.."Model_CNV_Model_res");
+--End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_res");
 
 
 dofile (wkdir.."Advantage_res2.lua");

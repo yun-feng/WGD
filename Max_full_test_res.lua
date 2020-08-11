@@ -2,24 +2,25 @@ require "torch"
 require "nn"
 require "nngraph"
 
-wkdir="/data/ted/WGD/Max_"
+wkdir="/data/suzaku/ted/WGD/Max_"
 opt={}
 train={}
 test={}
 
 dofile (wkdir.."Policy_res.lua");
-dofile (wkdir.."read_data.lua");
+dofile (wkdir.."read_data_Kuramoch.lua");
 
-Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res3");
+--Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res3");
+Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res_new3");
 CNV_Model=torch.load(wkdir.."Model_CNV_Model_res_new3");
 End_Point_Model=torch.load(wkdir.."Model_End_Point_Model_res_new3");
 
 dofile (wkdir.."Advantage_res.lua");
 dofile (wkdir.."train_res.lua");
-dofile (wkdir.."data_simu_res.lua");
+dofile (wkdir.."data_simu_res_loss.lua");
 
-train.step_sample=50
-Nsample=10
+train.step_sample=100
+Nsample=15
 train.Chr_sample=torch.zeros(Nsample,train.step_sample)
 train.CNV_sample=torch.zeros(Nsample,train.step_sample)
 train.End_sample=torch.zeros(Nsample,train.step_sample)

@@ -181,10 +181,10 @@ CNV_Net:add(nn.SpatialConvolution(nkernels[1]/2, nkernels[2]/2, 1, 7, 1, 1, 0,3)
 CNV_Net:add(nn.Threshold(0, 1e-6))
 CNV_Net:add(nn.SpatialConvolution(nkernels[2]/2, nkernels[3]/2, 1, 7, 1, 1, 0,3))
 CNV_Net:add(nn.Threshold(0, 1e-6))
-CNV_Net:add(nn.SpatialConvolution(nkernels[3]/2, nkernels[4]/2, 1, 7, 1, 1, 0,3))
+CNV_Net:add(nn.SpatialConvolution(nkernels[3]/2, 10, 1, 7, 1, 1, 0,3))
 CNV_Net:add(nn.Threshold(0, 1e-6))
-CNV_Net:add(nn.Reshape(nkernels[4]/2*50))
-CNV_Net:add(nn.Linear(nkernels[4]/2*50,2*chrom_width-1))
+CNV_Net:add(nn.Reshape(10*50))
+CNV_Net:add(nn.Linear(10*50,2*chrom_width-1))
 
 CNV_Net_WGD=CNV_Net:clone()
 
@@ -240,11 +240,11 @@ End_Point_Net:add(nn.Threshold(0, 1e-6))
 End_Point_Net:add(nn.SpatialConvolution(nkernels[1]/2, nkernels[2]/2, 1, 7, 1, 1, 0,3))
 End_Point_Net:add(nn.Threshold(0, 1e-6))
 --CNV_Net =CNV_Net-nn.SpatialMaxPooling(1,5,1,5,0,5-math.ceil(width/20)%5)
-End_Point_Net:add(nn.SpatialConvolution(nkernels[2]/2, nkernels[3]/2, 1, 7, 1, 1, 0,3))
+End_Point_Net:add(nn.SpatialConvolution(nkernels[2]/2, 10, 1, 7, 1, 1, 0,3))
 End_Point_Net:add(nn.Threshold(0, 1e-6))
 
-End_Point_Net:add(nn.Reshape(nkernels[3]/2*chrom_width))
-End_Point_Net:add(nn.Linear(nkernels[3]/2*chrom_width,chrom_width-1))
+End_Point_Net:add(nn.Reshape(10*chrom_width))
+End_Point_Net:add(nn.Linear(10*chrom_width,chrom_width-1))
 
 End_Point_WGD=End_Point_Net:clone()
 

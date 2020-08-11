@@ -108,7 +108,7 @@ Advantage_cal=function()
 					temp_max=CNV_Model.output[i][train.start_loci[i][j][2]*2-1]
 					train.max_cnv[i]=train.start_loci[i][j][2]*2-1
 				end
-				if (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>-0.5) then
+				if (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>0.5) then
 					if  (train.start_loci[i][j][2]*2-1>2) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]>temp_max) then
 							temp_max=CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]
 							train.max_cnv[i]=train.start_loci[i][j][2]*2-1-1
@@ -145,7 +145,7 @@ Advantage_cal=function()
 				train.max_end[i]=1
 			end
 			for j=1,train.end_loci[i]:size(1) do
-				if(train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>-0.5) then
+				if(train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>0.5) then
 					if train.end_loci[i][j][1] >1 then
 						temp_max=math.max(temp_max,(End_Point_Model.output[i][train.end_loci[i][j][1]-1]))
 						train.max_end[i]=train.end_loci[i][1][1]
@@ -207,7 +207,7 @@ Advantage_cal2=function()
                                         temp_max=CNV_Model.output[i][train.start_loci[i][j][2]*2-1]
                                         train.max_cnv[i]=train.start_loci[i][j][2]*2-1
                                 end
-                                if (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>-0.5) then
+                                if (train.chrom_state[i][1][train.start_loci[i][j][2]][1]-1>0.5) then
                                         if  (train.start_loci[i][j][2]*2-1>2) and (CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]>temp_max) then
                                                         temp_max=CNV_Model.output[i][train.start_loci[i][j][2]*2-1-1]
                                                         train.max_cnv[i]=train.start_loci[i][j][2]*2-1-1
@@ -244,7 +244,7 @@ Advantage_cal2=function()
                                 temp_max_end=1
                         end
                         for j=1,temp_end_loci:size(1) do
-                                if(temp_action>0 or train.chrom_state[i][1][temp_end_loci[j][1]][1]-1>-0.5) then
+                                if(temp_action>0 or train.chrom_state[i][1][temp_end_loci[j][1]][1]-1>0.5) then
                                         if (temp_end_loci[j][1] >1) and (End_Point_Model.output[temp_end_loci[j][1]-1]>temp_max) then
                                                                         temp_max=End_Point_Model.output[temp_end_loci[j][1]-1]
                                                                         temp_max_end=temp_end_loci[j][1]
@@ -295,7 +295,7 @@ Advantage_cal2=function()
                                 temp_max=0
                         end
                         for j=1,train.end_loci[i]:size(1) do
-                                if(train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>-0.5) then
+                                if(train.cnv[i]>0 or train.chrom_state[i][1][train.end_loci[i][j][1]][1]-1>0.5) then
                                         if train.end_loci[i][j][1] >1 then
                                                 temp_max=math.max(temp_max,(End_Point_Model.output[i][train.end_loci[i][j][1]-1]))
                                         else

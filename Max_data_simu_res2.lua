@@ -608,7 +608,7 @@ Deconvolute=function(cnp,max_step)
 							temp_max=CNV_Model.output[1][temp_start_loci[j][2]*2-1]
 							max_cnv=temp_start_loci[j][2]*2-1
 						end
-						if (chrom_state[1][temp_start_loci[j][2]][1]-1>-0.5 and not (rec_flag and flag_cnv==temp_start_loci[j][2]*2-1-1)) then
+						if (chrom_state[1][temp_start_loci[j][2]][1]-1>0.5 and not (rec_flag and flag_cnv==temp_start_loci[j][2]*2-1-1)) then
 							if  (temp_start_loci[j][2]*2-1>2) and (CNV_Model.output[1][temp_start_loci[j][2]*2-1-1]>temp_max) then
 									temp_max=CNV_Model.output[1][temp_start_loci[j][2]*2-1-1]
 									max_cnv=temp_start_loci[j][2]*2-1-1
@@ -647,12 +647,12 @@ Deconvolute=function(cnp,max_step)
 						max_end=1
 					end
 					for j=1,temp_end_loci:size(1) do
-						if(temp_action>0 or chrom_state[1][temp_end_loci[j][1]][1]-1>-0.5) then
+						if(temp_action>0 or chrom_state[1][temp_end_loci[j][1]][1]-1>0.5) then
 							if (temp_end_loci[j][1] >1) and (End_Point_Model.output[1][temp_end_loci[j][1]-1]>temp_max) then
 											temp_max=End_Point_Model.output[1][temp_end_loci[j][1]-1]
 											max_end=temp_end_loci[j][1]
 							end
-						elseif (temp_action<0 and chrom_state[1][temp_end_loci[j][1]][1]-1<-0.5) then
+						elseif (temp_action<0 and chrom_state[1][temp_end_loci[j][1]][1]-1<0.5) then
 							break
 						end
 					end

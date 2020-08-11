@@ -267,13 +267,13 @@ function model_train()
 
 	local temp,losses=opt.Method(feval_End,par_End,opt.State_End);
 
-	--switch_par=Chrom_Model:get(27):getParameters()
-	--switch_par_CNV=CNV_Model:get(12):getParameters()
-	--switch_par_End=End_Point_Model:get(16):getParameters()
-	--ave_switch=(switch_par+switch_par+switch_par_End)/3
-	--switch_par:copy(ave_switch)
-	--switch_par_CNV:copy(ave_switch)
-	--switch_par_End:copy(ave_switch)
+	switch_par=Chrom_Model:get(27):getParameters()
+	switch_par_CNV=CNV_Model:get(12):getParameters()
+	switch_par_End=End_Point_Model:get(16):getParameters()
+	ave_switch=(switch_par+switch_par+switch_par_End)/3
+	switch_par:copy(ave_switch)
+	switch_par_CNV:copy(ave_switch)
+	switch_par_End:copy(ave_switch)
 end
 
 

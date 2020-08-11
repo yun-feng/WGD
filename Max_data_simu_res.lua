@@ -433,7 +433,7 @@ end
 
 
 LoadData_t=function(step)
-	N_batch_sample=100
+	N_batch_sample=50
         train.state=torch.ones(N_batch_sample,2,1100,1)
 		train.next=torch.ones(N_batch_sample,2,1100,1)
 		train.valid=torch.ones(N_batch_sample)
@@ -456,7 +456,7 @@ LoadData_t=function(step)
                         train.StartL[i]=1
                         train.End[i]=chrom_width
                 end
-                if(torch.rand(1)[1]>0.7) then
+                if(torch.rand(1)[1]>0.5) then
                         train.cnv[i]=1
                 end
 			end
@@ -478,10 +478,10 @@ LoadData_t=function(step)
 				end
 				train.valid[i]=1
 			
-                if ( train.WGD_sample[i]<0.5 and (torch.rand(1)[1]<0.1/(1+math.exp(-train.step_sample+step+10)) or step==1)) then
-                       train.state[i]=train.state[i]*2
-                        train.next[i]=train.next[i]*2
-                        train.WGD_sample[i]=step
+                if ( train.WGD_sample[i]<0.5 and (torch.rand(1)[1]<0.2/(1+math.exp(-train.step_sample+step+10)) or step==1)) then
+                      -- train.state[i]=train.state[i]*2
+                      --  train.next[i]=train.next[i]*2
+                      --  train.WGD_sample[i]=step
                 end
 
                 for j=train.StartL[i],train.End[i] do
@@ -656,7 +656,7 @@ Deconvolute_WGD=function(cnp,max_step)
                         flag_end=0
                         rec_flag=false
 	
-	        flag_WGD=false
+	        flag_WGD=true--false
                         current_step=0
                         test.ChrA:zero()
                         test.CNV:zero()
@@ -782,6 +782,7 @@ Deconvolute_WGD=function(cnp,max_step)
                                 end
                                 if(max_chr==-1) then
                                         cnp_b=cnp:clone()
+					test.cnp=cnp_b
                                 end
                                 test.ChrA[current_step]=max_chr
                                 test.CNV[current_step]=max_cnv+1

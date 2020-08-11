@@ -8,7 +8,7 @@ train={}
 test={}
 
 dofile (wkdir.."Policy_res.lua");
-dofile (wkdir.."read_data.lua");
+--dofile (wkdir.."read_data.lua");
 
 Chrom_Model=torch.load(wkdir.."Model_Chrom_Model_res3");
 CNV_Model=torch.load(wkdir.."Model_CNV_Model_res_new3");
@@ -29,25 +29,29 @@ LoadData_t(train.step_sample)
 
 
 
-out_file1=wkdir.."simu_Chr_WGD_train"
-out_file2=wkdir.."simu_CNV_WGD_train"
-out_file3=wkdir.."simu_End_WGD_train"
+out_file1=wkdir.."simu_Chr_train"
+out_file2=wkdir.."simu_CNV_train"
+out_file3=wkdir.."simu_End_train"
+out_file8=wkdir.."simu_time_train"
 out1 = assert(io.open(out_file1, "w")) 
 out2 = assert(io.open(out_file2, "w")) 
 out3 = assert(io.open(out_file3, "w")) 
+out8 = assert(io.open(out_file8, "w"))
 splitter = "\t"
 for i=1,Nsample do
-	for k=1,70 do
+	for k=1,50 do
 		out1:write(train.Chr_sample[i][k])
-		out2:write(train.Chr_sample[i][k])
-		out3:write(train.Chr_sample[i][k])
+		out2:write(train.CNV_sample[i][k])
+		out3:write(train.End_sample[i][k])
 		out1:write(splitter)
 		out2:write(splitter)
 		out3:write(splitter)
 	end
+	out8:write(train.WGD_sample[i])
 	out1:write("\n")
 	out2:write("\n")
 	out3:write("\n")
+	out8:write("\n")
 end
 
 
@@ -111,10 +115,10 @@ test.truth=torch.zeros(Nsample)
 test.rl=torch.zeros(Nsample)
 
 
-out_file4=wkdir.."simu_step_WGD_test"
-out_file5=wkdir.."simu_Chr_WGD_rl"
-out_file6=wkdir.."simu_CNV_WGD_rl"
-out_file7=wkdir.."simu_End_WGD_rl"
+out_file4=wkdir.."simu_step_test"
+out_file5=wkdir.."simu_Chr_rl"
+out_file6=wkdir.."simu_CNV_rl"
+out_file7=wkdir.."simu_End_rl"
 out4 = assert(io.open(out_file4, "w")) 
 out5 = assert(io.open(out_file5, "w")) 
 out6 = assert(io.open(out_file6, "w")) 
@@ -124,8 +128,18 @@ for i=1,Nsample do
 	test.ChrA=torch.zeros(train.step_sample+20)
 	test.CNV=torch.zeros(train.step_sample+20)
 	test.End=torch.zeros(train.step_sample+20)
-	Deconvolute_WGD(train.state[i],train.step_sample+20)
+	temp_state=train.state[i]:clone()
+	temp_state2=train.state[i]:clone()
+	Deconvolute(train.state[i],train.step_sample+20)
 	test.rl[i]=test.rl[i]+0.0+test.ChrA:nonzero():size(1)
+
+	test.ChrA=torch.zeros(train.step_sample+20)
+	Deconvolute_WGD(temp_state,train.step_sample+20)
+	if test.rl[i]>test.ChrA:nonzero():size(1) then
+		test.rl[i]=test.ChrA:nonzero():size(1)
+	else
+		Deconvolute(temp_state2,train.step_sample+20)
+	end
 	test.truth[i]=math.min(test.rl[i],test.Naive[i],train.Chr_sample[i]:nonzero():size(1)+torch.ceil(train.WGD_sample[i]/train.step_sample))
 	out4:write(test.Naive[i])
 	out4:write(splitter)
